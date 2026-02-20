@@ -1,0 +1,20 @@
+namespace Core.Combat
+{
+    public enum DamageType
+    {
+        Physical,
+        Magical
+    }
+
+    public struct Damage
+    {
+        public int Value;
+        public DamageType Type;
+
+        public Damage(int value, DamageType type)
+        {
+            Value = value;
+            Type = type;
+        }
+    }
+}
