@@ -16,7 +16,7 @@ namespace Gameplay.Characters
 
         protected override void OnDeath()
         {
-            // Логика смерти игрока (позже будет Game Over)
+            // Логика смерти игрока
         }
     }
 }

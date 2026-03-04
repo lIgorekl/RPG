@@ -6,6 +6,7 @@ namespace Gameplay.Characters
 {
     public abstract class DamageableEntity : IDamageable
     {
+        public event System.Action<Damage> DamageReceived;
         public event System.Action<int, int> HealthChanged;
         public event System.Action Died;
         protected IHealth Health;
@@ -23,6 +24,7 @@ namespace Gameplay.Characters
 
             Health.TakeDamage(damage.Value);
             HealthChanged?.Invoke(Health.Current, Health.Max);
+            DamageReceived?.Invoke(damage);
             OnDamageReceived(damage);
 
             if (Health.IsDead)

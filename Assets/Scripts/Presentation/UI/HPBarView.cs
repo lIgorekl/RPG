@@ -8,6 +8,7 @@ namespace Presentation.UI
     {
         [SerializeField] private PlayerController playerController;
         [SerializeField] private Image hpFill;
+        [SerializeField] private TMPro.TMP_Text hpText;
 
         private void Start()
         {
@@ -38,6 +39,11 @@ namespace Presentation.UI
         {
             float normalized = (float)current / max;
             hpFill.fillAmount = normalized;
+
+            if (hpText != null)
+            {
+                hpText.text = $"HP: {current} / {max}";
+            }
         }
     }
 }

@@ -14,6 +14,11 @@ namespace Presentation.Scene
 
         protected EnemyEntity enemy;
 
+        public EnemyEntity GetEntity()
+        {
+            return enemy;
+        }
+
         protected virtual void Awake()
         {
             var stats = new CharacterStats(maxHP, physicalDamage, magicalDamage);

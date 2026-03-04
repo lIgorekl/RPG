@@ -3,6 +3,7 @@ using Gameplay.Characters;
 using Gameplay.Stats;
 using UnityEngine.InputSystem;
 using Core.Combat;
+using Presentation.Combat;
 
 namespace Presentation.Player
 {
@@ -14,8 +15,29 @@ namespace Presentation.Player
         [SerializeField] private int magicalDamage = 15;
         [SerializeField] private Camera playerCamera;
         [SerializeField] private float attackDistance = 5f;
-        [SerializeField] private float moveSpeed = 5f;
+        [SerializeField] private float walkSpeed = 3f;
+        [SerializeField] private float runSpeed = 6f;
+
+        private MovementState _currentMovementState = MovementState.Walk;
         [SerializeField] private float rotationSpeed = 10f;
+        [SerializeField] private float stunDuration = 0.2f;
+        [SerializeField] private ProjectileView magicProjectilePrefab;
+        [SerializeField] private Transform projectileSpawnPoint;
+        [SerializeField] private float meleeAttackDistance = 2f;
+        [SerializeField] private float magicCooldown = 2f;
+        public bool IsMagicOnCooldown => _isMagicOnCooldown;
+
+        public float MagicCooldownProgress =>
+            _isMagicOnCooldown ? _magicCooldownTimer / magicCooldown : 0f;
+
+        public event System.Action MagicCooldownStarted;
+        public event System.Action MagicCooldownFinished;
+
+        private float _magicCooldownTimer;
+        private bool _isMagicOnCooldown;
+
+        private float _stunTimer;
+        private bool _isStunned;
 
         private CharacterController _characterController;
 
@@ -27,6 +49,7 @@ namespace Presentation.Player
             _player = new PlayerEntity(stats);
             _characterController = GetComponent<CharacterController>();
             _player.Died += OnPlayerDied;
+            _player.DamageReceived += OnDamageReceived;
             _player.HealthChanged += (current, max) =>
             {
                 Debug.Log($"Player HP changed: {current}/{max}");
@@ -36,18 +59,44 @@ namespace Presentation.Player
         private void Update()
         {
             if (_isDead) return;
+            if (_isStunned)
+            {
+                _stunTimer -= Time.deltaTime;
+                if (_stunTimer <= 0f)
+                {
+                    _isStunned = false;
+                }
+                return;
+            }
+            if (_isMagicOnCooldown)
+            {
+                _magicCooldownTimer -= Time.deltaTime;
+
+                if (_magicCooldownTimer <= 0f)
+                {
+                    _isMagicOnCooldown = false;
+                    MagicCooldownFinished?.Invoke();
+                }
+            }
             HandleMovement();
             var mouse = Mouse.current;
             if (mouse == null || playerCamera == null) return;
 
             if (mouse.leftButton.wasPressedThisFrame)
             {
-                TryAttack(_player.GetPhysicalDamage());
+                RotateTowardsCamera();
+                TryMeleeAttack(_player.GetPhysicalDamage());
             }
 
-            if (mouse.rightButton.wasPressedThisFrame)
+            if (mouse.rightButton.wasPressedThisFrame && !_isMagicOnCooldown)
             {
-                TryAttack(_player.GetMagicalDamage());
+                RotateTowardsCamera();
+                SpawnMagicProjectile(_player.GetMagicalDamage());
+
+                _isMagicOnCooldown = true;
+                _magicCooldownTimer = magicCooldown;
+
+                MagicCooldownStarted?.Invoke();
             }
         }
 
@@ -56,17 +105,53 @@ namespace Presentation.Player
             return _player;
         }
 
-        private void TryAttack(Damage damage)
-        {
-            Ray ray = playerCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+        
 
-            if (Physics.Raycast(ray, out RaycastHit hit, attackDistance))
+        private void TryMeleeAttack(Damage damage)
+        {
+            Vector3 origin = transform.position + Vector3.up * 1f; // чуть выше центра
+            Vector3 direction = transform.forward;
+
+            if (Physics.Raycast(origin, direction, out RaycastHit hit, meleeAttackDistance))
             {
                 var damageable = hit.collider.GetComponent<Core.Combat.IDamageable>();
                 if (damageable != null)
                 {
                     damageable.ReceiveDamage(damage);
                 }
+            }
+        }
+
+        private void SpawnMagicProjectile(Damage damage)
+        {
+            if (magicProjectilePrefab == null || projectileSpawnPoint == null || playerCamera == null)
+                return;
+
+            // Создаём снаряд в точке спавна
+            Vector3 direction = playerCamera.transform.forward;
+            direction.y = 0f;
+            direction.Normalize();
+
+            Quaternion rotation = Quaternion.LookRotation(direction);
+
+            var projectile = Instantiate(
+                magicProjectilePrefab,
+                projectileSpawnPoint.position,
+                rotation);
+
+            // Передаём урон внутрь снаряда
+            projectile.Initialize(damage);
+        }
+
+        private void RotateTowardsCamera()
+        {
+            Vector3 cameraForward = playerCamera.transform.forward;
+            cameraForward.y = 0f;
+
+            if (cameraForward.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(cameraForward);
+                transform.rotation = targetRotation;
             }
         }
 
@@ -78,6 +163,11 @@ namespace Presentation.Player
             var keyboard = Keyboard.current;
             if (keyboard == null)
                 return;
+
+            // Определяем состояние движения
+            _currentMovementState = keyboard.leftShiftKey.isPressed
+                ? MovementState.Run
+                : MovementState.Walk;
 
             float horizontal = 0f;
             float vertical = 0f;
@@ -103,11 +193,16 @@ namespace Presentation.Player
 
             Vector3 moveDirection = cameraForward * inputDirection.z + cameraRight * inputDirection.x;
 
-            _characterController.Move(moveDirection * moveSpeed * Time.deltaTime);
+            float speed = _currentMovementState == MovementState.Run ? runSpeed : walkSpeed;
+            _characterController.Move(moveDirection * speed * Time.deltaTime);
 
             // Поворот персонажа
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                rotationSpeed * Time.deltaTime
+            );
         }
 
         private bool _isDead;
@@ -122,6 +217,20 @@ namespace Presentation.Player
         {
             if (_player != null)
                 _player.Died -= OnPlayerDied;
+
+            _player.DamageReceived -= OnDamageReceived;
+        }
+
+        private void OnDamageReceived(Damage damage)
+        {
+            _isStunned = true;
+            _stunTimer = stunDuration;
+        }
+
+        private enum MovementState
+        {
+            Walk,
+            Run
         }
     }
 }
