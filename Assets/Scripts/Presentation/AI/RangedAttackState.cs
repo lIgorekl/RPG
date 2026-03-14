@@ -1,6 +1,7 @@
 using UnityEngine;
 using Core.Combat;
 using Presentation.Player;
+using Presentation.Combat;
 
 namespace Presentation.AI
 {
@@ -17,7 +18,12 @@ namespace Presentation.AI
 
         public void Enter()
         {
-            _timer = 0f;
+            _timer = _cooldown;
+
+            if (_behaviour.Agent != null)
+            {
+                _behaviour.Agent.isStopped = true;
+            }
         }
 
         public void Update()
@@ -34,6 +40,17 @@ namespace Presentation.AI
                 return;
             }
 
+            Vector3 direction =
+                _behaviour.Player.position - _behaviour.Self.position;
+
+            direction.y = 0f;
+
+            if (direction.sqrMagnitude > 0.01f)
+            {
+                _behaviour.Self.rotation =
+                    Quaternion.LookRotation(direction);
+            }
+
             _timer -= Time.deltaTime;
 
             if (_timer <= 0f)
@@ -46,16 +63,34 @@ namespace Presentation.AI
 
         private void TryAttack()
         {
+            var prefab = _behaviour.ProjectilePrefab;
+
+            var projectile = Object.Instantiate(
+                prefab,
+                _behaviour.ProjectileSpawnPoint.position,
+                Quaternion.identity
+            );
+
+            Vector3 direction =
+                _behaviour.Player.position - _behaviour.ProjectileSpawnPoint.position;
+
+            direction.y = 0f;
+            direction.Normalize();
+
+            projectile.transform.forward = direction;
+
             var entity = _behaviour.EnemyView.GetEntity();
             var damage = entity.GetMagicalDamage();
 
-            var playerController = _behaviour.PlayerController;
-            if (playerController != null)
-            {
-                playerController.GetEntity().ReceiveDamage(damage);
-            }
+            projectile.Initialize(damage, _behaviour.Self);
         }
 
-        public void Exit() { }
+        public void Exit()
+        {
+            if (_behaviour.Agent != null)
+            {
+                _behaviour.Agent.isStopped = false;
+            }
+        }
     }
 }

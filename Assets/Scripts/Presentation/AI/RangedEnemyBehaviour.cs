@@ -1,5 +1,7 @@
 using UnityEngine;
 using Presentation.Scene;
+using UnityEngine.AI;
+using Presentation.Combat;
 
 namespace Presentation.AI
 {
@@ -9,17 +11,24 @@ namespace Presentation.AI
         [SerializeField] private float minDistance = 5f;
         [SerializeField] private float maxDistance = 10f;
         [SerializeField] private float moveSpeed = 3f;
+        [SerializeField] private ProjectileView projectilePrefab;
+        [SerializeField] private Transform projectileSpawnPoint;
         public Presentation.Player.PlayerController PlayerController => _playerController;
         private Presentation.Player.PlayerController _playerController;
 
         private EnemyStateMachine _stateMachine;
         private Transform _player;
         private BaseEnemyView _enemyView;
+        private NavMeshAgent _agent;
+
+        public ProjectileView ProjectilePrefab => projectilePrefab;
+        public Transform ProjectileSpawnPoint => projectileSpawnPoint;
 
         private void Awake()
         {
             _stateMachine = new EnemyStateMachine();
             _enemyView = GetComponent<BaseEnemyView>();
+            _agent = GetComponent<NavMeshAgent>();
         }
 
         private void Start()
@@ -42,5 +51,6 @@ namespace Presentation.AI
         public float MoveSpeed => moveSpeed;
         public BaseEnemyView EnemyView => _enemyView;
         public EnemyStateMachine StateMachine => _stateMachine;
+        public NavMeshAgent Agent => _agent;
     }
 }

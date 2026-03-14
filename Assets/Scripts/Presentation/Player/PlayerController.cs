@@ -23,8 +23,13 @@ namespace Presentation.Player
         [SerializeField] private float stunDuration = 0.2f;
         [SerializeField] private ProjectileView magicProjectilePrefab;
         [SerializeField] private Transform projectileSpawnPoint;
+        [SerializeField] private SwordHitbox swordHitbox;
         [SerializeField] private float meleeAttackDistance = 2f;
         [SerializeField] private float magicCooldown = 2f;
+        [SerializeField] private float meleeCooldown = 0.6f;
+
+        private float _meleeCooldownTimer;
+        private bool _isMeleeOnCooldown;
         public bool IsMagicOnCooldown => _isMagicOnCooldown;
 
         public float MagicCooldownProgress =>
@@ -38,16 +43,19 @@ namespace Presentation.Player
 
         private float _stunTimer;
         private bool _isStunned;
+        private bool _isAttacking;
 
         private CharacterController _characterController;
 
         private PlayerEntity _player;
+        private Animator _animator;
 
         private void Awake()
         {
             var stats = new CharacterStats(maxHP, physicalDamage, magicalDamage);
             _player = new PlayerEntity(stats);
             _characterController = GetComponent<CharacterController>();
+            _animator = GetComponentInChildren<Animator>();
             _player.Died += OnPlayerDied;
             _player.DamageReceived += OnDamageReceived;
             _player.HealthChanged += (current, max) =>
@@ -78,14 +86,37 @@ namespace Presentation.Player
                     MagicCooldownFinished?.Invoke();
                 }
             }
+
+            if (_isMeleeOnCooldown)
+            {
+                _meleeCooldownTimer -= Time.deltaTime;
+
+                if (_meleeCooldownTimer <= 0f)
+                {
+                    _isMeleeOnCooldown = false;
+                    _isAttacking = false;
+
+                    swordHitbox.Deactivate();
+                }
+            }
             HandleMovement();
             var mouse = Mouse.current;
             if (mouse == null || playerCamera == null) return;
 
-            if (mouse.leftButton.wasPressedThisFrame)
+            if (mouse.leftButton.wasPressedThisFrame && !_isMeleeOnCooldown)
             {
                 RotateTowardsCamera();
-                TryMeleeAttack(_player.GetPhysicalDamage());
+
+                if (_animator != null)
+                    _animator.SetTrigger("Attack");
+
+                _isAttacking = true;
+
+                swordHitbox.Initialize(_player.GetPhysicalDamage());
+                swordHitbox.Activate();
+
+                _isMeleeOnCooldown = true;
+                _meleeCooldownTimer = meleeCooldown;
             }
 
             if (mouse.rightButton.wasPressedThisFrame && !_isMagicOnCooldown)
@@ -122,6 +153,11 @@ namespace Presentation.Player
             }
         }
 
+        public void PerformMeleeAttack()
+        {
+            TryMeleeAttack(_player.GetPhysicalDamage());
+        }
+
         private void SpawnMagicProjectile(Damage damage)
         {
             if (magicProjectilePrefab == null || projectileSpawnPoint == null || playerCamera == null)
@@ -140,7 +176,7 @@ namespace Presentation.Player
                 rotation);
 
             // Передаём урон внутрь снаряда
-            projectile.Initialize(damage);
+            projectile.Initialize(damage, transform);
         }
 
         private void RotateTowardsCamera()
@@ -157,6 +193,9 @@ namespace Presentation.Player
 
         private void HandleMovement()
         {
+            if (_isAttacking)
+                return;
+
             if (playerCamera == null || _characterController == null)
                 return;
 
@@ -179,7 +218,12 @@ namespace Presentation.Player
 
             Vector3 inputDirection = new Vector3(horizontal, 0f, vertical).normalized;
             if (inputDirection.sqrMagnitude < 0.01f)
+            {
+                if (_animator != null)
+                    _animator.SetFloat("Speed", 0f);
+
                 return;
+            }
 
             // Направления камеры
             Vector3 cameraForward = playerCamera.transform.forward;
@@ -203,6 +247,12 @@ namespace Presentation.Player
                 targetRotation,
                 rotationSpeed * Time.deltaTime
             );
+
+            if (_animator != null)
+            {
+                float speedPercent = _currentMovementState == MovementState.Run ? 1f : 0.5f;
+                _animator.SetFloat("Speed", speedPercent);
+            }
         }
 
         private bool _isDead;
@@ -210,6 +260,12 @@ namespace Presentation.Player
         private void OnPlayerDied()
         {
             _isDead = true;
+
+            if (_animator != null)
+            {
+                _animator.SetTrigger("Death");
+            }
+
             Debug.Log("Game Over: Player died");
         }
 
@@ -225,6 +281,11 @@ namespace Presentation.Player
         {
             _isStunned = true;
             _stunTimer = stunDuration;
+
+            if (_animator != null)
+            {
+                _animator.SetTrigger("Hurt");
+            }
         }
 
         private enum MovementState

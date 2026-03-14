@@ -33,15 +33,17 @@ namespace Presentation.AI
 
             if (distance < _behaviour.MinDistance)
             {
-                // Отступаем
-                _behaviour.Self.position -=
-                    direction * _behaviour.MoveSpeed * Time.deltaTime;
+                Vector3 target =
+                    _behaviour.Self.position - direction * 2f;
+
+                _behaviour.Agent.SetDestination(target);
             }
             else if (distance > _behaviour.MaxDistance)
             {
-                // Подходим ближе
-                _behaviour.Self.position +=
-                    direction * _behaviour.MoveSpeed * Time.deltaTime;
+                Vector3 target =
+                    _behaviour.Self.position + direction * 2f;
+
+                _behaviour.Agent.SetDestination(target);
             }
             else
             {

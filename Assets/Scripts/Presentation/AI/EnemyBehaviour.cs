@@ -1,5 +1,6 @@
 using UnityEngine;
 using Presentation.Scene;
+using UnityEngine.AI;
 
 namespace Presentation.AI
 {
@@ -12,11 +13,13 @@ namespace Presentation.AI
         private EnemyStateMachine _stateMachine;
         private Transform _player;
         private BaseEnemyView _enemyView;
+        private NavMeshAgent _agent;
 
         private void Awake()
         {
             _stateMachine = new EnemyStateMachine();
             _enemyView = GetComponent<BaseEnemyView>();
+            _agent = GetComponent<NavMeshAgent>();
         }
 
         private void Start()
@@ -38,5 +41,6 @@ namespace Presentation.AI
         public Transform Self => transform;
         public BaseEnemyView EnemyView => _enemyView;
         public EnemyStateMachine StateMachine => _stateMachine;
+        public NavMeshAgent Agent => _agent;
     }
 }

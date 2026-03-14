@@ -16,7 +16,12 @@ namespace Presentation.AI
 
         public void Enter()
         {
-            _timer = 0f;
+            _timer = _attackCooldown;
+
+            if (_behaviour.Agent != null)
+            {
+                _behaviour.Agent.isStopped = true;
+            }
         }
 
         public void Update()
@@ -43,18 +48,15 @@ namespace Presentation.AI
 
         private void TryAttack()
         {
-            var entity = _behaviour.EnemyView.GetEntity();
-            var damage = entity.GetPhysicalDamage();
-
-            var playerController =
-                _behaviour.Player.GetComponent<Presentation.Player.PlayerController>();
-
-            if (playerController != null)
-            {
-                playerController.GetEntity().ReceiveDamage(damage);
-            }
+            _behaviour.EnemyView.Attack(_behaviour.Player);
         }
 
-        public void Exit() { }
+        public void Exit()
+        {
+            if (_behaviour.Agent != null)
+            {
+                _behaviour.Agent.isStopped = false;
+            }
+        }
     }
 }

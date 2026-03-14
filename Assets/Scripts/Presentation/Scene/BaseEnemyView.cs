@@ -42,6 +42,20 @@ namespace Presentation.Scene
             Destroy(gameObject);
         }
 
+        public virtual void Attack(Transform player)
+        {
+            var entity = GetEntity();
+            var damage = entity.GetPhysicalDamage();
+
+            var playerController =
+                player.GetComponent<Presentation.Player.PlayerController>();
+
+            if (playerController != null)
+            {
+                playerController.GetEntity().ReceiveDamage(damage);
+            }
+        }
+
         public bool IsDead => enemy.IsDead;
     }
 }
