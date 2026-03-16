@@ -12,12 +12,10 @@ namespace Gameplay.Characters
 
         protected override void OnDamageReceived(Damage damage)
         {
-            Debug.Log($"Enemy received {damage.Value} {damage.Type} damage. HP: {CurrentHP}/{MaxHP}");
         }
 
         protected override void OnDeath()
         {
-            Debug.Log("Enemy died");
         }
     }
 }

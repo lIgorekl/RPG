@@ -1,16 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Presentation.Scene;
-using Core.Combat;
 
 namespace Presentation.UI
 {
+    // UI элемент полоски HP врага.
+    // Подписывается на событие изменения здоровья EnemyEntity.
     public class EnemyHealthBarView : MonoBehaviour
     {
         [SerializeField] private BaseEnemyView enemyView;
         [SerializeField] private Image hpFill;
-
-        private IDamageable _damageable;
 
         private void Start()
         {
@@ -21,19 +20,22 @@ namespace Presentation.UI
             }
 
             var entity = enemyView.GetEntity();
+
             entity.HealthChanged += OnHealthChanged;
 
+            // Инициализируем текущее состояние HP
             OnHealthChanged(entity.CurrentHP, entity.MaxHP);
         }
 
         private void OnDestroy()
         {
-            if (enemyView != null)
-            {
-                var entity = enemyView.GetEntity();
-                if (entity != null)
-                    entity.HealthChanged -= OnHealthChanged;
-            }
+            if (enemyView == null)
+                return;
+
+            var entity = enemyView.GetEntity();
+
+            if (entity != null)
+                entity.HealthChanged -= OnHealthChanged;
         }
 
         private void OnHealthChanged(int current, int max)

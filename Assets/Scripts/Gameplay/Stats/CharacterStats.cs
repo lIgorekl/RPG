@@ -1,5 +1,7 @@
 namespace Gameplay.Stats
 {
+    // Хранит базовые характеристики персонажа.
+    // Используется игроком и врагами.
     public class CharacterStats
     {
         public int MaxHP { get; private set; }

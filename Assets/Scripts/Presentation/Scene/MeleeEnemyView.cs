@@ -1,12 +1,11 @@
 using UnityEngine;
-using Gameplay.Characters;
-using Gameplay.Stats;
-using Core.Combat;
 
 namespace Presentation.Scene
 {
+    // View ближнего врага.
+    // Наследует базовую логику BaseEnemyView.
+    // Используется для разделения типов врагов в сцене.
     public class MeleeEnemyView : BaseEnemyView
     {
-        // Поведение ближнего врага добавим позже
     }
 }

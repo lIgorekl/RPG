@@ -4,6 +4,8 @@ using Presentation.Player;
 
 namespace Presentation.UI
 {
+    // UI индикатор кулдауна магической атаки игрока.
+    // Отображает прогресс перезарядки способности.
     public class MagicCooldownView : MonoBehaviour
     {
         [SerializeField] private PlayerController playerController;
@@ -27,20 +29,19 @@ namespace Presentation.UI
 
         private void OnDestroy()
         {
-            if (playerController != null)
-            {
-                playerController.MagicCooldownStarted -= OnCooldownStarted;
-                playerController.MagicCooldownFinished -= OnCooldownFinished;
-            }
+            if (playerController == null)
+                return;
+
+            playerController.MagicCooldownStarted -= OnCooldownStarted;
+            playerController.MagicCooldownFinished -= OnCooldownFinished;
         }
 
         private void Update()
         {
-            if (_isTracking)
-            {
-                cooldownImage.fillAmount =
-                    playerController.MagicCooldownProgress;
-            }
+            if (!_isTracking)
+                return;
+
+            cooldownImage.fillAmount = playerController.MagicCooldownProgress;
         }
 
         private void OnCooldownStarted()

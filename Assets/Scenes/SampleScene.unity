@@ -5805,6 +5805,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dc326f8d9ba386409c220824546df48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _player: {fileID: 2224492635388220257}
   detectionRadius: 10
   attackRadius: 2
   moveSpeed: 3
@@ -7031,7 +7032,6 @@ MonoBehaviour:
   magicalDamage: 10
   animator: {fileID: 0}
   stunDuration: 0.6
-  attackRange: 8
 --- !u!95 &3591797075732509672
 Animator:
   serializedVersion: 7
@@ -9058,6 +9058,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4f54682a62966c48884fd2647d524fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _player: {fileID: 2224492635388220257}
   detectionRadius: 12
   minDistance: 5
   maxDistance: 10

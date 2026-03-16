@@ -1,16 +1,21 @@
 using UnityEngine;
 
+// Поворачивает объект лицом к камере.
+// Используется для UI элементов над персонажами (например HP bar).
 public class Billboard : MonoBehaviour
 {
-    private Camera cam;
+    private Camera _camera;
 
-    private void Start()
+    private void Awake()
     {
-        cam = Camera.main;
+        _camera = Camera.main;
     }
 
     private void LateUpdate()
     {
-        transform.forward = cam.transform.forward;
+        if (_camera == null)
+            return;
+
+        transform.forward = _camera.transform.forward;
     }
 }
