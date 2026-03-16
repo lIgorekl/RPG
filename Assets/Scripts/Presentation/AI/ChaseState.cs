@@ -33,6 +33,22 @@ namespace Presentation.AI
                 return;
             }
 
+            Vector3 direction =
+                _behaviour.Player.position - _behaviour.Self.position;
+
+            direction.y = 0f;
+
+            if (direction.sqrMagnitude > 0.01f)
+            {
+                Quaternion lookRotation = Quaternion.LookRotation(direction);
+
+                _behaviour.Self.rotation =
+                    Quaternion.Slerp(
+                        _behaviour.Self.rotation,
+                        lookRotation,
+                        10f * Time.deltaTime);
+            }
+
             _behaviour.Agent.SetDestination(_behaviour.Player.position);
         }
 

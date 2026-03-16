@@ -23,6 +23,14 @@ namespace Presentation.AI
 
         private void Update()
         {
+            var enemyView = GetComponent<Presentation.Scene.BaseEnemyView>();
+
+            if (enemyView != null)
+            {
+                if (enemyView.IsDead || enemyView.IsStunned)
+                    return;
+            }
+
             var melee = GetComponent<EnemyBehaviour>();
             var ranged = GetComponent<RangedEnemyBehaviour>();
 

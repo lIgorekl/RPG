@@ -28,6 +28,9 @@ namespace Presentation.AI
 
         public void Update()
         {
+            if (_behaviour.EnemyView.IsStunned)
+                return;
+            
             float distance = Vector3.Distance(
                 _behaviour.Self.position,
                 _behaviour.Player.position);
@@ -63,6 +66,12 @@ namespace Presentation.AI
 
         private void TryAttack()
         {
+            // запускаем анимацию стрельбы
+            if (_behaviour.EnemyView.Animator != null)
+            {
+                _behaviour.EnemyView.Animator.SetTrigger("Attack");
+            }
+
             var prefab = _behaviour.ProjectilePrefab;
 
             var projectile = Object.Instantiate(

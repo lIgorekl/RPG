@@ -40,7 +40,37 @@ namespace Presentation.AI
 
         private void Update()
         {
+            if (_enemyView.IsDead)
+                return;
+
+            if (_enemyView.IsStunned)
+                return;
+
             _stateMachine.Update();
+        }
+
+        public void ShootProjectile()
+        {
+            var prefab = projectilePrefab;
+
+            var projectile = Instantiate(
+                prefab,
+                projectileSpawnPoint.position,
+                Quaternion.identity
+            );
+
+            Vector3 direction =
+                Player.position - projectileSpawnPoint.position;
+
+            direction.y = 0f;
+            direction.Normalize();
+
+            projectile.transform.forward = direction;
+
+            var entity = EnemyView.GetEntity();
+            var damage = entity.GetMagicalDamage();
+
+            projectile.Initialize(damage, transform);
         }
 
         public Transform Player => _player;

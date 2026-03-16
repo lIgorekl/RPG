@@ -17,9 +17,10 @@ namespace Presentation.AI
 
         private void Awake()
         {
-            _stateMachine = new EnemyStateMachine();
             _enemyView = GetComponent<BaseEnemyView>();
             _agent = GetComponent<NavMeshAgent>();
+
+            _stateMachine = new EnemyStateMachine();
         }
 
         private void Start()
@@ -31,6 +32,12 @@ namespace Presentation.AI
 
         private void Update()
         {
+            if (_enemyView.IsDead)
+                return;
+
+            if (_enemyView.IsStunned)
+                return;
+
             _stateMachine.Update();
         }
 
