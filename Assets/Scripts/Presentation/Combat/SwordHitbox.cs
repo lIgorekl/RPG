@@ -1,5 +1,6 @@
 using UnityEngine;
 using Core.Combat;
+using App;
 
 namespace Presentation.Combat
 {
@@ -7,6 +8,9 @@ namespace Presentation.Combat
     // Активируется во время удара и наносит урон первому попавшему объекту.
     public class SwordHitbox : MonoBehaviour
     {
+        // Звук при попадании мечом
+        [SerializeField] private AudioClip hitSound;
+
         private Damage _damage;
 
         // Активен ли хитбокс в данный момент
@@ -48,6 +52,10 @@ namespace Presentation.Combat
                 return;
 
             damageable.ReceiveDamage(_damage);
+
+            GameEntryPoint.Instance
+                .GetAudioService()
+                .PlaySFX(hitSound);
 
             // Не даём мечу нанести урон несколько раз за одну атаку
             _hasHit = true;
