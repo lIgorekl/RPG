@@ -48,5 +48,10 @@ namespace Gameplay.Characters
         protected virtual void OnDamageReceived(Damage damage) { }
 
         protected virtual void OnDeath() { }
+
+        protected void NotifyHealthChanged()
+        {
+            HealthChanged?.Invoke(Health.Current, Health.Max);
+        }
     }
 }

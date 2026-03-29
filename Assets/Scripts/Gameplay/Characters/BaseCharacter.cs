@@ -34,5 +34,18 @@ namespace Gameplay.Characters
         {
             return GetPhysicalDamage();
         }
+
+        public void SetHP(int value)
+        {
+            // пересоздаём здоровье
+            Health = new Health(MaxHP);
+
+            int delta = value - MaxHP;
+
+            if (delta < 0)
+                Health.TakeDamage(-delta);
+
+            NotifyHealthChanged();
+        }
     }
 }

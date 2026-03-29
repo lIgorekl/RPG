@@ -3,6 +3,7 @@ using UnityEngine.AI;
 using Gameplay.Characters;
 using Gameplay.Stats;
 using Core.Combat;
+using App.SaveLoad;
 
 namespace Presentation.Scene
 {
@@ -18,6 +19,8 @@ namespace Presentation.Scene
         [SerializeField] protected Animator animator;
 
         [SerializeField] private float stunDuration = 0.6f;
+
+        [SerializeField] private string enemyId;
 
         public Animator Animator => animator;
         public bool IsStunned => _isStunned;
@@ -78,8 +81,10 @@ namespace Presentation.Scene
             {
                 _isStunned = false;
 
-                if (agent != null)
+                if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+                {
                     agent.isStopped = false;
+                }
             }
         }
 
@@ -137,7 +142,7 @@ namespace Presentation.Scene
             if (ranged != null)
                 ranged.enabled = false;
 
-            Destroy(gameObject, 5f);
+            StartCoroutine(DisableAfterDelay(5f));
         }
 
         // Базовая атака врага (используется ближними врагами)
@@ -156,6 +161,67 @@ namespace Presentation.Scene
 
             if (playerController != null)
                 playerController.GetEntity().ReceiveDamage(damage);
+        }
+
+        public string GetId()
+        {
+            return enemyId;
+        }
+
+        public void ApplySaveData(EnemySaveData data)
+        {
+            if (data.IsDead)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
+
+            gameObject.SetActive(true);
+
+            Revive();
+
+            transform.position = new Vector3(
+                data.PositionX,
+                data.PositionY,
+                data.PositionZ
+            );
+
+            var entity = GetEntity();
+            entity.SetHP(data.CurrentHp);
+        }
+
+        private void Revive()
+        {
+            // NavMeshAgent
+            if (agent != null)
+            {
+                agent.enabled = true;
+                agent.isStopped = false;
+            }
+
+            // Ближний ИИ
+            var behaviour = GetComponent<Presentation.AI.EnemyBehaviour>();
+            if (behaviour != null)
+                behaviour.enabled = true;
+
+            // Дальний ИИ
+            var ranged = GetComponent<Presentation.AI.RangedEnemyBehaviour>();
+            if (ranged != null)
+                ranged.enabled = true;
+
+            // Анимации
+            if (animator != null)
+            {
+                animator.ResetTrigger("Death");
+                animator.Play("Idle");
+            }
+        }
+
+        private System.Collections.IEnumerator DisableAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            gameObject.SetActive(false);
         }
     }
 }

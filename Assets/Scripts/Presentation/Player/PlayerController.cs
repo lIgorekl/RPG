@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 using Core.Combat;
 using Presentation.Combat;
 using Core.Gameplay;
+using App.SaveLoad;
+using App;
 
 namespace Presentation.Player
 {
@@ -214,6 +216,47 @@ namespace Presentation.Player
 
             if (_animator != null)
                 _animator.SetTrigger("Hurt");
+        }
+
+        public void ApplySaveData(PlayerSaveData data)
+        {
+            // игрок
+            transform.position = new Vector3(
+                data.PositionX,
+                data.PositionY,
+                data.PositionZ
+            );
+
+            _player.SetHP((int)data.CurrentHp);
+
+            // ВРАГИ
+            var entryPoint = FindObjectOfType<GameSceneEntryPoint>();
+            var enemies = entryPoint.GetEnemies();
+
+            // 1. СНАЧАЛА выключаем ВСЕХ
+            foreach (var enemy in enemies)
+            {
+                if (enemy == null)
+                    continue;
+
+                enemy.gameObject.SetActive(false);
+            }
+
+            // 2. Потом восстанавливаем нужных
+            foreach (var enemyData in data.Enemies)
+            {
+                foreach (var enemy in enemies)
+                {
+                    if (enemy == null)
+                        continue;
+
+                    if (enemy.GetId() != enemyData.Id)
+                        continue;
+
+                    enemy.ApplySaveData(enemyData);
+                    break;
+                }
+            }
         }
     }
 }

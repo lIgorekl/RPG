@@ -1,17 +1,31 @@
 using UnityEngine;
+using App.SaveLoad;
+using Presentation.Scene;
 
 namespace App.Services
 {
     public class SaveService : ISaveService
     {
-        public void Save()
+        private readonly SaveLoadInteractor _interactor;
+
+        public SaveService(SaveLoadInteractor interactor)
         {
-            Debug.Log("Game Saved");
+            _interactor = interactor;
         }
 
-        public void Load()
+        public void Save(
+            Transform playerTransform,
+            float currentHp,
+            float maxHp,
+            BaseEnemyView[] enemies
+        )
         {
-            Debug.Log("Game Loaded");
+            _interactor.Save(playerTransform, currentHp, maxHp, enemies);
+        }
+
+        public PlayerSaveData Load()
+        {
+            return _interactor.Load();
         }
     }
 }

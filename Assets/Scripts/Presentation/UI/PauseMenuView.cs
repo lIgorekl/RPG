@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using App;
+using App.Services;
+using Gameplay.Stats;        // для Health
+using Presentation.Player;
 
 namespace Presentation.UI
 {
@@ -10,6 +13,8 @@ namespace Presentation.UI
 
         private bool _isPaused;
         private PauseMenuController _controller;
+        private ISaveService _saveService;
+        private PlayerController _player;
 
         private void Update()
         {
@@ -22,11 +27,33 @@ namespace Presentation.UI
             {
                 TogglePause();
             }
+
+            if (Keyboard.current.f5Key.wasPressedThisFrame)
+            {
+                Save();
+            }
         }
 
         private void Awake()
         {
             _controller = new PauseMenuController();
+
+            var entryPoint = FindObjectOfType<GameSceneEntryPoint>();
+
+            if (entryPoint == null)
+            {
+                Debug.LogError("GameSceneEntryPoint NOT FOUND");
+                return;
+            }
+
+            _saveService = entryPoint.GetSaveService();
+            _player = entryPoint.GetPlayer();
+
+            if (_saveService == null)
+                Debug.LogError("SaveService is NULL");
+
+            if (_player == null)
+                Debug.LogError("Player is NULL");
         }
 
         private void TogglePause()
@@ -62,13 +89,36 @@ namespace Presentation.UI
         // Кнопка Save
         public void Save()
         {
-            Debug.Log("Save clicked");
+            var player = _player;
+            var entity = player.GetEntity();
+
+            var entryPoint = FindObjectOfType<GameSceneEntryPoint>();
+
+            _saveService.Save(
+                player.transform,
+                entity.CurrentHP,
+                entity.MaxHP,
+                entryPoint.GetEnemies()
+            );
+
+            Debug.Log("SAVE BUTTON CLICKED");
         }
 
         // Кнопка Load
         public void Load()
         {
-            Debug.Log("Load clicked");
+            var data = _saveService.Load();
+
+            if (data == null)
+            {
+                Debug.Log("No save found");
+                return;
+            }
+
+            var player = FindObjectOfType<PlayerController>();
+            player.ApplySaveData(data);
+
+            Debug.Log("Game Loaded");
         }
     }
 }
