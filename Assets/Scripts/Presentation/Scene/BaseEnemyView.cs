@@ -4,6 +4,7 @@ using Gameplay.Characters;
 using Gameplay.Stats;
 using Core.Combat;
 using App.SaveLoad;
+using Presentation.AI;
 
 namespace Presentation.Scene
 {
@@ -23,14 +24,11 @@ namespace Presentation.Scene
         [SerializeField] private string enemyId;
 
         public Animator Animator => animator;
-        public bool IsStunned => _isStunned;
         public bool IsDead => enemy.IsDead;
 
         protected EnemyEntity enemy;
 
         private NavMeshAgent agent;
-        private bool _isStunned;
-        private float _stunTimer;
 
         public EnemyEntity GetEntity()
         {
@@ -58,7 +56,6 @@ namespace Presentation.Scene
         private void Update()
         {
             UpdateAnimation();
-            UpdateStun();
         }
 
         private void UpdateAnimation()
@@ -68,24 +65,6 @@ namespace Presentation.Scene
 
             float speed = agent.velocity.magnitude;
             animator.SetFloat("Speed", speed);
-        }
-
-        private void UpdateStun()
-        {
-            if (!_isStunned)
-                return;
-
-            _stunTimer -= Time.deltaTime;
-
-            if (_stunTimer <= 0f)
-            {
-                _isStunned = false;
-
-                if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
-                {
-                    agent.isStopped = false;
-                }
-            }
         }
 
         // Получение урона из системы боя
@@ -100,22 +79,16 @@ namespace Presentation.Scene
             if (enemy.IsDead)
                 return;
 
-            ApplyStun();
+            var behaviour = GetComponent<BaseEnemyBehaviour>();
+
+            if (behaviour != null)
+            {
+                behaviour.StateMachine.ChangeState(
+                    new StunState(behaviour, stunDuration));
+            }
 
             if (animator != null)
                 animator.SetTrigger("Hurt");
-        }
-
-        private void ApplyStun()
-        {
-            _isStunned = true;
-            _stunTimer = stunDuration;
-
-            if (agent != null)
-            {
-                agent.isStopped = true;
-                agent.velocity = Vector3.zero;
-            }
         }
 
         // Вызывается когда HP врага = 0
@@ -170,49 +143,59 @@ namespace Presentation.Scene
 
         public void ApplySaveData(EnemySaveData data)
         {
-            if (data.IsDead)
-            {
-                gameObject.SetActive(false);
-                return;
-            }
-
+            StopAllCoroutines();
             gameObject.SetActive(true);
 
-            Revive();
-
+            // 1. ПОЗИЦИЯ
             transform.position = new Vector3(
                 data.PositionX,
                 data.PositionY,
                 data.PositionZ
             );
 
-            var entity = GetEntity();
-            entity.SetHP(data.CurrentHp);
+            // 2. HP
+            enemy.SetHP(data.CurrentHp);
+
+            // 3. СМЕРТЬ
+            if (data.IsDead)
+            {
+                OnEnemyDied();
+                return;
+            }
+
+            // 4. ВОССТАНОВЛЕНИЕ
+            Revive();
         }
 
         private void Revive()
         {
-            // NavMeshAgent
             if (agent != null)
             {
                 agent.enabled = true;
+                agent.Warp(transform.position);
                 agent.isStopped = false;
             }
 
-            // Ближний ИИ
-            var behaviour = GetComponent<Presentation.AI.EnemyBehaviour>();
-            if (behaviour != null)
-                behaviour.enabled = true;
+            var baseBehaviour = GetComponent<BaseEnemyBehaviour>();
 
-            // Дальний ИИ
-            var ranged = GetComponent<Presentation.AI.RangedEnemyBehaviour>();
-            if (ranged != null)
-                ranged.enabled = true;
+            if (baseBehaviour != null)
+            {
+                baseBehaviour.enabled = true;
 
-            // Анимации
+                if (baseBehaviour is EnemyBehaviour melee)
+                {
+                    melee.StateMachine.ChangeState(new IdleState(melee));
+                }
+                else if (baseBehaviour is RangedEnemyBehaviour ranged)
+                {
+                    ranged.StateMachine.ChangeState(new RangedIdleState(ranged));
+                }
+            }
+
             if (animator != null)
             {
                 animator.ResetTrigger("Death");
+                animator.ResetTrigger("Hurt");
                 animator.Play("Idle");
             }
         }

@@ -48,9 +48,6 @@ namespace Presentation.AI
             if (_enemyView.IsDead)
                 return;
 
-            if (_enemyView.IsStunned)
-                return;
-
             _stateMachine.Update();
         }
     }

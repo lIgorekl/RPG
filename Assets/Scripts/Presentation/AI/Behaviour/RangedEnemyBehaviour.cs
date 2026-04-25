@@ -36,7 +36,7 @@ namespace Presentation.AI
         }
 
         // Создание и запуск магического снаряда
-        public void ShootProjectile()
+        public void PerformAttack()
         {
             var projectile = Instantiate(
                 projectilePrefab,

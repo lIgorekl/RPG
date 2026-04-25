@@ -9,5 +9,7 @@ namespace Presentation.AI
     {
         Transform Player { get; }
         float DetectionRadius { get; }
+        UnityEngine.AI.NavMeshAgent Agent { get; }
+        Transform Self { get; }
     }
 }

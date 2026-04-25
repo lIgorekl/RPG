@@ -2664,7 +2664,6 @@ GameObject:
   - component: {fileID: 3675572693187100576}
   - component: {fileID: 2853429413292876904}
   - component: {fileID: 5428365382241414328}
-  - component: {fileID: 226347373358320596}
   - component: {fileID: 4612991446226527443}
   m_Layer: 0
   m_Name: MeleeEnemy
@@ -2682,7 +2681,7 @@ Transform:
   m_GameObject: {fileID: 7806538930925831115}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.97, y: 1, z: -15.14}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2783,6 +2782,7 @@ MonoBehaviour:
   magicalDamage: 0
   animator: {fileID: 0}
   stunDuration: 0.6
+  enemyId: 
 --- !u!114 &5428365382241414328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2799,20 +2799,6 @@ MonoBehaviour:
   detectionRadius: 10
   attackRadius: 2
   moveSpeed: 3
---- !u!114 &226347373358320596
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7806538930925831115}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29c95c4935deddb42976d7e4be41a5da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wanderRadius: 5
-  waitTime: 2
 --- !u!195 &4612991446226527443
 NavMeshAgent:
   m_ObjectHideFlags: 0

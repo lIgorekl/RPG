@@ -84,5 +84,22 @@ namespace App.Services
             // короткий бип (или замени на свой звук)
             _sfxSource.PlayOneShot(testClip);
         }
+
+        public void PlaySFXAtPoint(AudioClip clip, Vector3 position)
+        {
+            if (clip == null) return;
+
+            GameObject go = new GameObject("TempAudio");
+            go.transform.position = position;
+
+            var source = go.AddComponent<AudioSource>();
+            source.clip = clip;
+            source.volume = _sfxVolume;
+            source.spatialBlend = 1f; // 3D звук
+
+            source.Play();
+
+            Object.Destroy(go, clip.length);
+        }
     }
 }

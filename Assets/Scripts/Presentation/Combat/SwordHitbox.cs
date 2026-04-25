@@ -55,7 +55,7 @@ namespace Presentation.Combat
 
             GameEntryPoint.Instance
                 .GetAudioService()
-                .PlaySFX(hitSound);
+                .PlaySFXAtPoint(hitSound, transform.position);
 
             // Не даём мечу нанести урон несколько раз за одну атаку
             _hasHit = true;
