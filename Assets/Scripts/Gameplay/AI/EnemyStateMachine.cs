@@ -6,6 +6,8 @@ namespace Presentation.AI
     {
         private IEnemyState _currentState;
 
+        public IEnemyState CurrentState => _currentState;
+
         // Переключение состояния AI
         public void ChangeState(IEnemyState newState)
         {

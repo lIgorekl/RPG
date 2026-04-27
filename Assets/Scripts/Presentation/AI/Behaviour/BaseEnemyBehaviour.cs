@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.AI;
 using Presentation.Scene;
+using App;
+using App.Services;
 
 namespace Presentation.AI
 {
@@ -12,6 +14,7 @@ namespace Presentation.AI
         protected EnemyStateMachine _stateMachine;
         protected BaseEnemyView _enemyView;
         protected NavMeshAgent _agent;
+        protected IGameModeService _gameModeService;
 
         [SerializeField] protected Transform _player;
 
@@ -21,6 +24,7 @@ namespace Presentation.AI
         public BaseEnemyView EnemyView => _enemyView;
         public EnemyStateMachine StateMachine => _stateMachine;
         public NavMeshAgent Agent => _agent;
+        public IGameModeService GameModeService => _gameModeService;
 
         // Радиус обнаружения задаётся в конкретных типах врагов
         public abstract float DetectionRadius { get; }
@@ -40,13 +44,52 @@ namespace Presentation.AI
             {
                 Debug.LogError($"{name}: Player reference not set!");
             }
+
+            if (_agent != null && !_agent.isOnNavMesh)
+            {
+                if (UnityEngine.AI.NavMesh.SamplePosition(
+                    transform.position,
+                    out UnityEngine.AI.NavMeshHit hit,
+                    2f,
+                    UnityEngine.AI.NavMesh.AllAreas))
+                {
+                    _agent.Warp(hit.position);
+                }
+            }
+            _gameModeService = GameEntryPoint.Instance.GetGameModeService();
         }
 
         protected virtual void Update()
         {
-            // Если враг мёртв или оглушён — AI не работает
             if (_enemyView.IsDead)
                 return;
+
+            var entity = _enemyView.GetEntity();
+
+            float hpPercent =
+                (float)entity.CurrentHP / entity.MaxHP;
+
+            float distance = Vector3.Distance(
+                transform.position,
+                _player.position);
+
+            // УБЕГАЕМ ТОЛЬКО ЕСЛИ ИГРОК РЯДОМ
+            float fleeEnterDistance = DetectionRadius;
+            float fleeExitDistance = DetectionRadius * 1.5f;
+
+            if (!(this is BossBehaviour))
+            {
+                if (hpPercent < 0.3f && distance <= fleeEnterDistance)
+                {
+                    if (!(_stateMachine.CurrentState is FleeState))
+                    {
+                        _stateMachine.ChangeState(new FleeState(this));
+                    }
+
+                    _stateMachine.Update();
+                    return;
+                }
+            }
 
             _stateMachine.Update();
         }

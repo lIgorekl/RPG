@@ -1,4 +1,5 @@
 using UnityEngine;
+using App.Services;
 
 namespace Presentation.AI
 {
@@ -17,6 +18,15 @@ namespace Presentation.AI
 
         public void Update()
         {
+            var entity = _behaviour.EnemyView.GetEntity();
+            
+            if (_behaviour.GameModeService.CurrentMode == GameMode.Peaceful)
+            {
+                _behaviour.StateMachine.ChangeState(
+                    new IdleState(_behaviour));
+                return;
+            }
+
             float distance = Vector3.Distance(
                 _behaviour.Self.position,
                 _behaviour.Player.position);

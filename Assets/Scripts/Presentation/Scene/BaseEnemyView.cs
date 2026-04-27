@@ -70,6 +70,12 @@ namespace Presentation.Scene
         // Получение урона из системы боя
         public void ReceiveDamage(Damage damage)
         {
+            var boss = GetComponent<Presentation.AI.BossBehaviour>();
+            if (boss != null)
+            {
+                boss.Activate();
+            }
+
             if (enemy.IsDead)
                 return;
 
@@ -81,11 +87,24 @@ namespace Presentation.Scene
 
             var behaviour = GetComponent<BaseEnemyBehaviour>();
 
-            if (behaviour != null)
-            {
-                behaviour.StateMachine.ChangeState(
-                    new StunState(behaviour, stunDuration));
-            }
+            var entity = enemy;
+            
+            float hpPercent =
+                    (float)entity.CurrentHP / entity.MaxHP;
+
+            if (hpPercent >= 0.3f)
+                {
+                    if (behaviour is BossBehaviour bossBehaviour)
+                    {
+                        behaviour.StateMachine.ChangeState(
+                            new BossStunState(bossBehaviour, stunDuration));
+                    }
+                    else
+                    {
+                        behaviour.StateMachine.ChangeState(
+                            new StunState(behaviour, stunDuration));
+                    }
+                }
 
             if (animator != null)
                 animator.SetTrigger("Hurt");
@@ -121,13 +140,33 @@ namespace Presentation.Scene
         // Базовая атака врага (используется ближними врагами)
         public virtual void Attack(Transform player)
         {
+            Attack(player, 1f, false);
+        }
+
+        public virtual void Attack(Transform player, float damageMultiplier)
+        {
+            Attack(player, damageMultiplier, false);
+        }
+
+        public virtual void Attack(Transform player, float damageMultiplier, bool isHeavy)
+        {
             if (enemy.IsDead)
                 return;
 
             if (animator != null)
-                animator.SetTrigger("Attack");
+            {
+                if (isHeavy)
+                    animator.SetTrigger("HeavyAttack");
+                else
+                    animator.SetTrigger("Attack");
+            }
 
-            var damage = enemy.GetPhysicalDamage();
+            var baseDamage = enemy.GetPhysicalDamage();
+
+            var damage = new Core.Combat.Damage(
+                Mathf.RoundToInt(baseDamage.Value * damageMultiplier),
+                baseDamage.Type
+            );
 
             var playerController =
                 player.GetComponent<Presentation.Player.PlayerController>();
@@ -197,6 +236,12 @@ namespace Presentation.Scene
                 animator.ResetTrigger("Death");
                 animator.ResetTrigger("Hurt");
                 animator.Play("Idle");
+            }
+
+            var boss = GetComponent<Presentation.AI.BossBehaviour>();
+            if (boss != null)
+            {
+                boss.SetEnraged(false);
             }
         }
 

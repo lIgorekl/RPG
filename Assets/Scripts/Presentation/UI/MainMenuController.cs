@@ -1,11 +1,25 @@
 using App;
+using App.Services;
 
 namespace Presentation.UI
 {
     public class MainMenuController
     {
-        public void StartGame()
+        public void StartNormalGame()
         {
+            GameEntryPoint.Instance
+                .GetGameModeService()
+                .SetMode(GameMode.Normal);
+
+            GameEntryPoint.Instance.SceneService.LoadGame();
+        }
+
+        public void StartPeacefulGame()
+        {
+            GameEntryPoint.Instance
+                .GetGameModeService()
+                .SetMode(GameMode.Peaceful);
+
             GameEntryPoint.Instance.SceneService.LoadGame();
         }
 
@@ -31,6 +45,20 @@ namespace Presentation.UI
             GameEntryPoint.Instance
                 .GetAudioService()
                 .SetSfxVolume(value);
+        }
+
+        public void SetNormalMode()
+        {
+            GameEntryPoint.Instance
+                .GetGameModeService()
+                .SetMode(GameMode.Normal);
+        }
+
+        public void SetPeacefulMode()
+        {
+            GameEntryPoint.Instance
+                .GetGameModeService()
+                .SetMode(GameMode.Peaceful);
         }
     }
 }

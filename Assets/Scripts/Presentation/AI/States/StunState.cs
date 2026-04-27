@@ -1,4 +1,5 @@
 using UnityEngine;
+using App.Services;
 
 namespace Presentation.AI
 {
@@ -25,13 +26,17 @@ namespace Presentation.AI
 
             if (_timer <= 0f)
             {
-                if (_behaviour is EnemyBehaviour melee)
+                if (_behaviour is EnemyBehaviour melee2)
                 {
-                    _behaviour.StateMachine.ChangeState(new IdleState(melee));
+                    _behaviour.StateMachine.ChangeState(new IdleState(melee2));
                 }
                 else if (_behaviour is RangedEnemyBehaviour ranged)
                 {
                     _behaviour.StateMachine.ChangeState(new RangedIdleState(ranged));
+                }
+                else if (_behaviour is BossBehaviour boss)
+                {
+                    _behaviour.StateMachine.ChangeState(new BossIdleState(boss));
                 }
             }
         }

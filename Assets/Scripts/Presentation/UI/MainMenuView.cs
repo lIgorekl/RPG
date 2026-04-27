@@ -25,9 +25,14 @@ namespace Presentation.UI
             sfxSlider.SetValueWithoutNotify(audio.GetSfxVolume());
         }
 
-        public void Play()
+        public void PlayNormal()
         {
-            _controller.StartGame();
+            _controller.StartNormalGame();
+        }
+
+        public void PlayPeaceful()
+        {
+            _controller.StartPeacefulGame();
         }
 
         public void OpenSettings()
