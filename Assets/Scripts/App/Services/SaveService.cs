@@ -13,14 +13,9 @@ namespace App.Services
             _interactor = interactor;
         }
 
-        public void Save(
-            Transform playerTransform,
-            float currentHp,
-            float maxHp,
-            BaseEnemyView[] enemies
-        )
+        public void Save(PlayerSaveData data)
         {
-            _interactor.Save(playerTransform, currentHp, maxHp, enemies);
+            _interactor.Save(data);
         }
 
         public PlayerSaveData Load()

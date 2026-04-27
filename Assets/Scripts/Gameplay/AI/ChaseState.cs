@@ -18,8 +18,6 @@ namespace Presentation.AI
 
         public void Update()
         {
-            var entity = _behaviour.EnemyView.GetEntity();
-            
             if (_behaviour.GameModeService.CurrentMode == GameMode.Peaceful)
             {
                 _behaviour.StateMachine.ChangeState(

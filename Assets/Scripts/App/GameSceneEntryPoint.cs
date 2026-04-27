@@ -4,6 +4,7 @@ using App.SaveLoad;
 using App.Repositories;
 using Presentation.Player;
 using Presentation.Scene;
+using System.Collections.Generic;
 
 namespace App
 {
@@ -24,10 +25,25 @@ namespace App
         {
             Debug.Log("GameSceneEntryPoint Initialize CALLED");
 
+            var audioService = GameEntryPoint.Instance.GetAudioService();
+
+            // SAVE
             IPlayerRepository repository = new JsonPlayerRepository();
             _saveLoadInteractor = new SaveLoadInteractor(repository);
-
             _saveService = new SaveService(_saveLoadInteractor);
+
+            if (player != null)
+            {
+                player.InitializeAudio(audioService);
+            }
+
+            foreach (var enemy in enemies)
+            {
+                if (enemy == null)
+                    continue;
+
+                enemy.InitializeAudio(audioService);
+            }
 
             Debug.Log("Enemies count: " + enemies.Length);
             Debug.Log("SaveService CREATED");
@@ -46,6 +62,34 @@ namespace App
         public BaseEnemyView[] GetEnemies()
         {
             return enemies;
+        }
+
+        public void ApplyEnemiesSaveData(List<EnemySaveData> enemiesData)
+        {
+            // 1. выключаем всех
+            foreach (var enemy in enemies)
+            {
+                if (enemy == null)
+                    continue;
+
+                enemy.gameObject.SetActive(false);
+            }
+
+            // 2. восстанавливаем
+            foreach (var enemyData in enemiesData)
+            {
+                foreach (var enemy in enemies)
+                {
+                    if (enemy == null)
+                        continue;
+
+                    if (enemy.GetId() != enemyData.Id)
+                        continue;
+
+                    enemy.ApplySaveData(enemyData);
+                    break;
+                }
+            }
         }
     }
 }

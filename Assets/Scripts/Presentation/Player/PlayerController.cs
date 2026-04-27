@@ -7,6 +7,7 @@ using Presentation.Combat;
 using Core.Gameplay;
 using App.SaveLoad;
 using App;
+using App.Services;
 
 namespace Presentation.Player
 {
@@ -44,6 +45,7 @@ namespace Presentation.Player
         // Кулдауны атак
         private Cooldown _magicCooldown;
         private Cooldown _meleeCooldown;
+        private IAudioService _audioService;
 
         // Используется UI системой
         public bool IsMagicOnCooldown => _magicCooldown.IsActive;
@@ -220,7 +222,6 @@ namespace Presentation.Player
 
         public void ApplySaveData(PlayerSaveData data)
         {
-            // игрок
             transform.position = new Vector3(
                 data.PositionX,
                 data.PositionY,
@@ -228,35 +229,13 @@ namespace Presentation.Player
             );
 
             _player.SetHP((int)data.CurrentHp);
+        }
 
-            // ВРАГИ
-            var entryPoint = FindObjectOfType<GameSceneEntryPoint>();
-            var enemies = entryPoint.GetEnemies();
+        public void InitializeAudio(IAudioService audioService)
+        {
+            _audioService = audioService;
 
-            // 1. СНАЧАЛА выключаем ВСЕХ
-            foreach (var enemy in enemies)
-            {
-                if (enemy == null)
-                    continue;
-
-                enemy.gameObject.SetActive(false);
-            }
-
-            // 2. Потом восстанавливаем нужных
-            foreach (var enemyData in data.Enemies)
-            {
-                foreach (var enemy in enemies)
-                {
-                    if (enemy == null)
-                        continue;
-
-                    if (enemy.GetId() != enemyData.Id)
-                        continue;
-
-                    enemy.ApplySaveData(enemyData);
-                    break;
-                }
-            }
+            swordHitbox.InitializeAudio(audioService);
         }
     }
 }

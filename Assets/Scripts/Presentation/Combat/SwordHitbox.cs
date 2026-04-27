@@ -1,6 +1,7 @@
 using UnityEngine;
 using Core.Combat;
 using App;
+using App.Services;
 
 namespace Presentation.Combat
 {
@@ -18,6 +19,7 @@ namespace Presentation.Combat
 
         // Уже был нанесён урон в этой атаке
         private bool _hasHit;
+        private IAudioService _audioService;
 
         // Инициализация урона перед атакой
         public void Initialize(Damage damage)
@@ -53,12 +55,15 @@ namespace Presentation.Combat
 
             damageable.ReceiveDamage(_damage);
 
-            GameEntryPoint.Instance
-                .GetAudioService()
-                .PlaySFXAtPoint(hitSound, transform.position);
+            _audioService?.PlaySFXAtPoint(hitSound, transform.position);
 
             // Не даём мечу нанести урон несколько раз за одну атаку
             _hasHit = true;
+        }
+
+        public void InitializeAudio(IAudioService audioService)
+        {
+            _audioService = audioService;
         }
     }
 }

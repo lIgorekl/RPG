@@ -5,22 +5,31 @@ namespace Presentation.UI
 {
     public class MainMenuController
     {
+        private readonly ISceneService _sceneService;
+        private readonly IAudioService _audioService;
+        private readonly IGameModeService _gameModeService;
+
+        public MainMenuController(
+            ISceneService sceneService,
+            IAudioService audioService,
+            IGameModeService gameModeService)
+        {
+            _sceneService = sceneService;
+            _audioService = audioService;
+            _gameModeService = gameModeService;
+        }
         public void StartNormalGame()
         {
-            GameEntryPoint.Instance
-                .GetGameModeService()
-                .SetMode(GameMode.Normal);
+            _gameModeService.SetMode(GameMode.Normal);
 
-            GameEntryPoint.Instance.SceneService.LoadGame();
+            _sceneService.LoadGame();
         }
 
         public void StartPeacefulGame()
         {
-            GameEntryPoint.Instance
-                .GetGameModeService()
-                .SetMode(GameMode.Peaceful);
+            _gameModeService.SetMode(GameMode.Peaceful);
 
-            GameEntryPoint.Instance.SceneService.LoadGame();
+            _sceneService.LoadGame();
         }
 
         public void OpenSettings(System.Action onOpen)
@@ -35,30 +44,22 @@ namespace Presentation.UI
 
         public void ChangeMusicVolume(float value)
         {
-            GameEntryPoint.Instance
-                .GetAudioService()
-                .SetMusicVolume(value);
+            _audioService.SetMusicVolume(value);
         }
 
         public void ChangeSfxVolume(float value)
         {
-            GameEntryPoint.Instance
-                .GetAudioService()
-                .SetSfxVolume(value);
+            _audioService.SetSfxVolume(value);
         }
 
         public void SetNormalMode()
         {
-            GameEntryPoint.Instance
-                .GetGameModeService()
-                .SetMode(GameMode.Normal);
+            _gameModeService.SetMode(GameMode.Normal);
         }
 
         public void SetPeacefulMode()
         {
-            GameEntryPoint.Instance
-                .GetGameModeService()
-                .SetMode(GameMode.Peaceful);
+            _gameModeService.SetMode(GameMode.Peaceful);
         }
     }
 }

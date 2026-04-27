@@ -40,17 +40,6 @@ namespace Presentation.AI
                 _behaviour.StateMachine.ChangeState(
                     new BossRecoverState(_behaviour));
             }
-
-            _timer -= Time.deltaTime * _behaviour.AttackSpeedMultiplier;
-
-            if (_timer <= 0f)
-            {
-                // можно усилить урон позже
-                _behaviour.EnemyView.Attack(_behaviour.Player, 2.5f, true);
-
-                _behaviour.StateMachine.ChangeState(
-                    new BossRecoverState(_behaviour));
-            }
         }
 
         public void Exit()

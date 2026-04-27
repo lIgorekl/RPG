@@ -22,11 +22,6 @@ namespace Presentation.AI
 
         public void Update()
         {
-            var entity = _behaviour.EnemyView.GetEntity();
-
-            float hpPercent =
-                (float)entity.CurrentHP / entity.MaxHP;
-
             float distance = Vector3.Distance(
                 _behaviour.Self.position,
                 _behaviour.Player.position);

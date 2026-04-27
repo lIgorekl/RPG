@@ -4,6 +4,9 @@ using App;
 using App.Services;
 using Gameplay.Stats;        // для Health
 using Presentation.Player;
+using App.SaveLoad;
+using System.Collections.Generic;
+using Presentation.Scene;
 
 namespace Presentation.UI
 {
@@ -15,6 +18,8 @@ namespace Presentation.UI
         private PauseMenuController _controller;
         private ISaveService _saveService;
         private PlayerController _player;
+        private BaseEnemyView[] _enemies;
+        private GameSceneEntryPoint _entryPoint;
 
         private void Update()
         {
@@ -38,16 +43,17 @@ namespace Presentation.UI
         {
             _controller = new PauseMenuController();
 
-            var entryPoint = FindObjectOfType<GameSceneEntryPoint>();
+            _entryPoint = FindObjectOfType<GameSceneEntryPoint>();
 
-            if (entryPoint == null)
+            if (_entryPoint == null)
             {
                 Debug.LogError("GameSceneEntryPoint NOT FOUND");
                 return;
             }
 
-            _saveService = entryPoint.GetSaveService();
-            _player = entryPoint.GetPlayer();
+            _saveService = _entryPoint.GetSaveService();
+            _player = _entryPoint.GetPlayer();
+            _enemies = _entryPoint.GetEnemies();
 
             if (_saveService == null)
                 Debug.LogError("SaveService is NULL");
@@ -92,14 +98,35 @@ namespace Presentation.UI
             var player = _player;
             var entity = player.GetEntity();
 
-            var entryPoint = FindObjectOfType<GameSceneEntryPoint>();
+            var data = new PlayerSaveData
+            {
+                PositionX = player.transform.position.x,
+                PositionY = player.transform.position.y,
+                PositionZ = player.transform.position.z,
+                CurrentHp = entity.CurrentHP,
+                MaxHp = entity.MaxHP,
+                Enemies = new List<EnemySaveData>()
+            };
 
-            _saveService.Save(
-                player.transform,
-                entity.CurrentHP,
-                entity.MaxHP,
-                entryPoint.GetEnemies()
-            );
+            foreach (var enemy in _enemies)
+            {
+                if (enemy == null)
+                    continue;
+
+                var e = enemy.GetEntity();
+
+                data.Enemies.Add(new EnemySaveData
+                {
+                    PositionX = enemy.transform.position.x,
+                    PositionY = enemy.transform.position.y,
+                    PositionZ = enemy.transform.position.z,
+                    CurrentHp = e.CurrentHP,
+                    IsDead = e.IsDead,
+                    Id = enemy.GetId()
+                });
+            }
+
+            _saveService.Save(data);
 
             Debug.Log("SAVE BUTTON CLICKED");
         }
@@ -115,8 +142,8 @@ namespace Presentation.UI
                 return;
             }
 
-            var player = FindObjectOfType<PlayerController>();
-            player.ApplySaveData(data);
+            _player.ApplySaveData(data);
+            _entryPoint.ApplyEnemiesSaveData(data.Enemies);
 
             Debug.Log("Game Loaded");
         }

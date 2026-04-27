@@ -6,12 +6,7 @@ namespace App.Services
 {
     public interface ISaveService
     {
-        void Save(
-            Transform playerTransform,
-            float currentHp,
-            float maxHp,
-            BaseEnemyView[] enemies
-        );
+        void Save(PlayerSaveData data);
         PlayerSaveData Load();
     }
 }

@@ -5,6 +5,9 @@ namespace App
 {
     public class GameEntryPoint : MonoBehaviour
     {
+        [SerializeField] private AudioSource musicSource;
+        [SerializeField] private AudioSource sfxSource;
+        [SerializeField] private AudioClip menuMusic;
         private static GameEntryPoint _instance;
 
         private IAudioService _audioService;
@@ -35,6 +38,8 @@ namespace App
             _sceneService = new SceneService();
             _audioService = new AudioService();
             _gameModeService = new GameModeService();
+            _audioService.Initialize(musicSource, sfxSource);
+            _audioService.PlayMusic(menuMusic);
         }
     }
 }

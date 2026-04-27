@@ -14,7 +14,13 @@ namespace Presentation.UI
 
         private void Awake()
         {
-            _controller = new MainMenuController();
+            var entryPoint = GameEntryPoint.Instance;
+
+            _controller = new MainMenuController(
+                entryPoint.SceneService,
+                entryPoint.GetAudioService(),
+                entryPoint.GetGameModeService()
+            );
         }
 
         private void Start()

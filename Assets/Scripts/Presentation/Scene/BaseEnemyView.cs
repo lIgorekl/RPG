@@ -5,6 +5,7 @@ using Gameplay.Stats;
 using Core.Combat;
 using App.SaveLoad;
 using Presentation.AI;
+using App.Services;
 
 namespace Presentation.Scene
 {
@@ -29,6 +30,7 @@ namespace Presentation.Scene
         protected EnemyEntity enemy;
 
         private NavMeshAgent agent;
+        private IAudioService _audioService;
 
         public EnemyEntity GetEntity()
         {
@@ -239,9 +241,14 @@ namespace Presentation.Scene
             }
 
             var boss = GetComponent<Presentation.AI.BossBehaviour>();
+
             if (boss != null)
             {
-                boss.SetEnraged(false);
+                var entity = enemy;
+
+                float hpPercent = (float)entity.CurrentHP / entity.MaxHP;
+
+                boss.SetEnraged(hpPercent < 0.5f);
             }
         }
 
@@ -250,6 +257,11 @@ namespace Presentation.Scene
             yield return new WaitForSeconds(delay);
 
             gameObject.SetActive(false);
+        }
+
+        public void InitializeAudio(IAudioService audioService)
+        {
+            _audioService = audioService;
         }
     }
 }

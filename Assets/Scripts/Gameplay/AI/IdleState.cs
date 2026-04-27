@@ -23,7 +23,6 @@ namespace Presentation.AI
         public void Update()
         {
             var entity = _behaviour.EnemyView.GetEntity();
-
             float hpPercent =
                 (float)entity.CurrentHP / entity.MaxHP;
 
