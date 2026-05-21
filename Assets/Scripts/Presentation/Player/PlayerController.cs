@@ -22,7 +22,6 @@ namespace Presentation.Player
 
         [SerializeField] private Camera playerCamera;
 
-        [SerializeField] private float attackDistance = 5f;
         [SerializeField] private float walkSpeed = 3f;
         [SerializeField] private float runSpeed = 6f;
         [SerializeField] private float rotationSpeed = 10f;
@@ -33,32 +32,27 @@ namespace Presentation.Player
         [SerializeField] private Transform projectileSpawnPoint;
         [SerializeField] private SwordHitbox swordHitbox;
 
-        [SerializeField] private float meleeAttackDistance = 2f;
-
         [SerializeField] private float magicCooldown = 2f;
         [SerializeField] private float meleeCooldown = 0.6f;
 
         // Подсистемы игрока
         private PlayerMovement _movement;
+        private PlayerInputReader _inputReader;
         private PlayerCombat _combat;
+        private PlayerCombatController _combatController;
+        private PlayerLifeController _lifeController;
+        private PlayerSavePresenter _savePresenter;
 
-        // Кулдауны атак
-        private Cooldown _magicCooldown;
-        private Cooldown _meleeCooldown;
         private IAudioService _audioService;
 
-        // Используется UI системой
-        public bool IsMagicOnCooldown => _magicCooldown.IsActive;
-        public float MagicCooldownProgress => _magicCooldown.Progress;
+        public bool IsMagicOnCooldown =>
+            _combatController.IsMagicOnCooldown;
+
+        public float MagicCooldownProgress =>
+            _combatController.MagicCooldownProgress;
 
         public event System.Action MagicCooldownStarted;
         public event System.Action MagicCooldownFinished;
-
-        // Состояние игрока
-        private float _stunTimer;
-        private bool _isStunned;
-        private bool _isAttacking;
-        private bool _isDead;
 
         // Unity компоненты
         private CharacterController _characterController;
@@ -88,88 +82,62 @@ namespace Presentation.Player
                 magicProjectilePrefab,
                 swordHitbox);
 
-            // Кулдауны
-            _magicCooldown = new Cooldown(magicCooldown);
-            _meleeCooldown = new Cooldown(meleeCooldown);
+            _inputReader =
+                new PlayerInputReader();
 
             // Создаём игровую сущность игрока
             var stats = new CharacterStats(maxHP, physicalDamage, magicalDamage);
             _player = new PlayerEntity(stats);
 
-            // Подписка на события игрока
-            _player.Died += OnPlayerDied;
-            _player.DamageReceived += OnDamageReceived;
+            _combatController =
+                new PlayerCombatController(
+                    _player,
+                    _combat,
+                    _animator,
+                    playerCamera,
+                    transform,
+                    magicCooldown,
+                    meleeCooldown);
+
+            _lifeController =
+                new PlayerLifeController(
+                    _player,
+                    _animator,
+                    stunDuration);
+
+            _savePresenter =
+                new PlayerSavePresenter(
+                    transform,
+                    _player);
 
             _player.HealthChanged += (current, max) =>
             {
                 Debug.Log($"Player HP changed: {current}/{max}");
             };
+
+            _combatController.MagicCooldownStarted +=
+                () => MagicCooldownStarted?.Invoke();
+
+            _combatController.MagicCooldownFinished +=
+                () => MagicCooldownFinished?.Invoke();
         }
 
         private void Update()
         {
-            if (_isDead) return;
-
-            // Обработка стана
-            if (_isStunned)
-            {
-                _stunTimer -= Time.deltaTime;
-
-                if (_stunTimer <= 0f)
-                    _isStunned = false;
-
+            if (_lifeController.IsDead)
                 return;
-            }
 
-            // Обновление кулдауна магии
-            bool wasActive = _magicCooldown.IsActive;
-            _magicCooldown.Update(Time.deltaTime);
+            _lifeController.Update();
 
-            if (wasActive && !_magicCooldown.IsActive)
-                MagicCooldownFinished?.Invoke();
+            if (_lifeController.IsStunned)
+                return;
 
-            // Обновление кулдауна ближней атаки
-            _meleeCooldown.Update(Time.deltaTime);
-
-            if (!_meleeCooldown.IsActive && _isAttacking)
-            {
-                _isAttacking = false;
-                _combat.StopMelee();
-            }
+            PlayerInputData input =
+                _inputReader.ReadInput();
 
             // Движение игрока
-            _movement.Update();
-
-            var mouse = Mouse.current;
-            if (mouse == null || playerCamera == null) return;
-
-            // Ближняя атака
-            if (mouse.leftButton.wasPressedThisFrame && !_meleeCooldown.IsActive)
-            {
-                RotateTowardsCamera();
-
-                if (_animator != null)
-                    _animator.SetTrigger("Attack");
-
-                _isAttacking = true;
-
-                _combat.MeleeAttack(_player.GetPhysicalDamage());
-
-                _meleeCooldown.Start();
-            }
-
-            // Магическая атака
-            if (mouse.rightButton.wasPressedThisFrame && !_magicCooldown.IsActive)
-            {
-                RotateTowardsCamera();
-
-                _combat.CastMagic(
-                    _player.GetMagicalDamage(),
-                    transform);
-
-                _magicCooldown.Start();
-                MagicCooldownStarted?.Invoke();
-            }
+            _movement.Update(input);
+            _combatController.Update(input);
         }
 
         // Возвращает доменную сущность игрока
@@ -178,57 +146,14 @@ namespace Presentation.Player
             return _player;
         }
 
-        // Поворот игрока в направлении камеры (перед атакой)
-        private void RotateTowardsCamera()
-        {
-            Vector3 cameraForward = playerCamera.transform.forward;
-            cameraForward.y = 0f;
-
-            if (cameraForward.sqrMagnitude > 0.01f)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(cameraForward);
-                transform.rotation = targetRotation;
-            }
-        }
-
-        // Вызывается при смерти игрока
-        private void OnPlayerDied()
-        {
-            _isDead = true;
-
-            if (_animator != null)
-                _animator.SetTrigger("Death");
-
-            Debug.Log("Game Over: Player died");
-        }
-
         private void OnDestroy()
         {
-            if (_player != null)
-                _player.Died -= OnPlayerDied;
-
-            _player.DamageReceived -= OnDamageReceived;
-        }
-
-        // Реакция на получение урона
-        private void OnDamageReceived(Damage damage)
-        {
-            _isStunned = true;
-            _stunTimer = stunDuration;
-
-            if (_animator != null)
-                _animator.SetTrigger("Hurt");
+            _lifeController?.Dispose();
         }
 
         public void ApplySaveData(PlayerSaveData data)
         {
-            transform.position = new Vector3(
-                data.PositionX,
-                data.PositionY,
-                data.PositionZ
-            );
-
-            _player.SetHP((int)data.CurrentHp);
+            _savePresenter.ApplySaveData(data);
         }
 
         public void InitializeAudio(IAudioService audioService)
@@ -236,6 +161,11 @@ namespace Presentation.Player
             _audioService = audioService;
 
             swordHitbox.InitializeAudio(audioService);
+        }
+
+        public PlayerSaveData CreateSaveData()
+        {
+            return _savePresenter.CreateSaveData();
         }
     }
 }
