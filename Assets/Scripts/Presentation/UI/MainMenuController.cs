@@ -8,15 +8,18 @@ namespace Presentation.UI
         private readonly ISceneService _sceneService;
         private readonly IAudioService _audioService;
         private readonly IGameModeService _gameModeService;
+        private readonly AudioSettingsService _audioSettingsService;
 
         public MainMenuController(
             ISceneService sceneService,
             IAudioService audioService,
-            IGameModeService gameModeService)
+            IGameModeService gameModeService,
+            AudioSettingsService audioSettingsService)
         {
             _sceneService = sceneService;
             _audioService = audioService;
             _gameModeService = gameModeService;
+            _audioSettingsService = audioSettingsService;
         }
         public void StartNormalGame()
         {
@@ -44,12 +47,12 @@ namespace Presentation.UI
 
         public void ChangeMusicVolume(float value)
         {
-            _audioService.SetMusicVolume(value);
+            _audioSettingsService.SetMusicVolume(value);
         }
 
         public void ChangeSfxVolume(float value)
         {
-            _audioService.SetSfxVolume(value);
+            _audioSettingsService.SetSFXVolume(value);
         }
 
         public void SetNormalMode()

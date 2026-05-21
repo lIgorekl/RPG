@@ -13,6 +13,7 @@ namespace App
         private IAudioService _audioService;
         private ISceneService _sceneService;
         private IGameModeService _gameModeService;
+        private AudioSettingsService _audioSettingsService;
 
         public ISceneService SceneService => _sceneService;
         public static GameEntryPoint Instance => _instance;
@@ -38,8 +39,14 @@ namespace App
             _sceneService = new SceneService();
             _audioService = new AudioService();
             _gameModeService = new GameModeService();
+            _audioSettingsService = new AudioSettingsService();
             _audioService.Initialize(musicSource, sfxSource);
             _audioService.PlayMusic(menuMusic);
+        }
+
+        public AudioSettingsService GetAudioSettingsService()
+        {
+            return _audioSettingsService;
         }
     }
 }

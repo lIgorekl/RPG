@@ -19,16 +19,17 @@ namespace Presentation.UI
             _controller = new MainMenuController(
                 entryPoint.SceneService,
                 entryPoint.GetAudioService(),
-                entryPoint.GetGameModeService()
+                entryPoint.GetGameModeService(),
+                entryPoint.GetAudioSettingsService()
             );
         }
 
         private void Start()
         {
-            var audio = GameEntryPoint.Instance.GetAudioService();
+            var audioSettings = GameEntryPoint.Instance.GetAudioSettingsService();
 
-            musicSlider.SetValueWithoutNotify(audio.GetMusicVolume());
-            sfxSlider.SetValueWithoutNotify(audio.GetSfxVolume());
+            musicSlider.SetValueWithoutNotify(audioSettings.GetMusicVolume());
+            sfxSlider.SetValueWithoutNotify(audioSettings.GetSFXVolume());
         }
 
         public void PlayNormal()
