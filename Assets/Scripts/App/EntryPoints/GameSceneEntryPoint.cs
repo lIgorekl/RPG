@@ -5,6 +5,7 @@ using App.Repositories;
 using Presentation.Player;
 using Presentation.Scene;
 using System.Collections.Generic;
+using Presentation.AI;
 
 namespace App
 {
@@ -25,7 +26,11 @@ namespace App
         {
             Debug.Log("GameSceneEntryPoint Initialize CALLED");
 
-            var audioService = GameEntryPoint.Instance.GetAudioService();
+            var audioService = 
+                GameEntryPoint.Instance.GetAudioService();
+
+            var gameModeService =
+                GameEntryPoint.Instance.GetGameModeService();
 
             // SAVE
             IPlayerRepository repository = new JsonPlayerRepository();
@@ -43,6 +48,15 @@ namespace App
                     continue;
 
                 enemy.InitializeAudio(audioService);
+
+                var behaviour =
+                    enemy.GetComponent<BaseEnemyBehaviour>();
+
+                if (behaviour != null)
+                {
+                    behaviour.Initialize(
+                        gameModeService);
+                }
             }
 
             Debug.Log("Enemies count: " + enemies.Length);

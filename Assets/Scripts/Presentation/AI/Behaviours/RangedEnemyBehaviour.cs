@@ -5,7 +5,7 @@ namespace Presentation.AI
 {
     // Поведение врага дальнего боя.
     // Враг держит дистанцию от игрока и атакует магическими снарядами.
-    public class RangedEnemyBehaviour : BaseEnemyBehaviour
+    public class RangedEnemyBehaviour : BaseCombatEnemyBehaviour
     {
         [SerializeField] private float detectionRadius = 12f;
 
@@ -26,13 +26,16 @@ namespace Presentation.AI
 
         protected override void Start()
         {
+            _stateMachine =
+                new RangedEnemyStateMachine();
+
             base.Start();
 
-            // Получаем контроллер игрока
-            _playerController = _player.GetComponent<Presentation.Player.PlayerController>();
+            _playerController =
+                _player.GetComponent<Presentation.Player.PlayerController>();
 
-            _stateMachine.ChangeState(
-                _stateFactory.CreateRangedIdle(this));
+            ((RangedEnemyStateMachine)_stateMachine)
+                .EnterRangedIdle(this);
         }
 
         // Создание и запуск магического снаряда
@@ -63,9 +66,140 @@ namespace Presentation.AI
         public float MaxDistance => maxDistance;
         public float MoveSpeed => moveSpeed;
 
-        public override IEnemyState CreateDefaultState()
+        public bool ShouldReturnToRangedIdle()
         {
-            return _stateFactory.CreateRangedIdle(this);
+            return !CombatEvaluator.IsTargetDetected(
+                Self,
+                Player,
+                DetectionRadius);
+        }
+
+        public bool ShouldStartRangedAttack()
+        {
+            float distance = Vector3.Distance(
+                Self.position,
+                Player.position);
+
+            return distance >= MinDistance &&
+                distance <= MaxDistance;
+        }
+
+        public void UpdateMaintainDistance()
+        {
+            MovementService.MaintainDistance(
+                Agent,
+                Self,
+                Player,
+                MinDistance,
+                MaxDistance,
+                MoveSpeed);
+
+            RotateToPlayer();
+        }
+
+        public bool ShouldStopRangedAttack()
+        {
+            float distance = Vector3.Distance(
+                Self.position,
+                Player.position);
+
+            return distance < MinDistance ||
+                distance > MaxDistance;
+        }
+
+        public void EnterRangedAttack()
+        {
+            if (Agent != null)
+            {
+                Agent.isStopped = true;
+            }
+        }
+
+        public void ExitRangedAttack()
+        {
+            if (Agent != null)
+            {
+                Agent.isStopped = false;
+            }
+        }
+
+        public void UpdateRangedAttack()
+        {
+            RotateToPlayer();
+
+            PerformAttack();
+        }
+
+        public bool ShouldMaintainDistance()
+        {
+            if (!AggroPolicy.CanAggro())
+                return false;
+
+            return CombatEvaluator.IsTargetDetected(
+                Self,
+                Player,
+                DetectionRadius);
+        }
+
+        public void TickIdle(
+            ref float wanderTimer,
+            float wanderDelay)
+        {
+            if (ShouldMaintainDistance())
+            {
+                ((RangedEnemyStateMachine)StateMachine).EnterMaintainDistance(this);
+                return;
+            }
+
+            if (ShouldFlee())
+            {
+                if (CombatEvaluator.IsTargetDetected(
+                    Self,
+                    Player,
+                    DetectionRadius))
+                {
+                    ((RangedEnemyStateMachine)StateMachine).EnterFlee(this);
+                    return;
+                }
+            }
+
+            UpdateIdle(
+                ref wanderTimer,
+                wanderDelay);
+        }
+
+        public void TickMaintainDistance()
+        {
+            if (ShouldFlee())
+            {
+                ((RangedEnemyStateMachine)StateMachine).EnterFlee(this);
+                return;
+            }
+
+            if (ShouldReturnToRangedIdle())
+            {
+                ((RangedEnemyStateMachine)StateMachine).EnterRangedIdle(this);
+                return;
+            }
+
+            if (ShouldStartRangedAttack())
+            {
+                ((RangedEnemyStateMachine)StateMachine).EnterRangedAttack(this);
+                return;
+            }
+
+            UpdateMaintainDistance();
+        }
+
+        public void TickAttack()
+        {
+            if (ShouldStopRangedAttack())
+            {
+                ((RangedEnemyStateMachine)StateMachine).EnterMaintainDistance(this);
+                return;
+            }
+
+            UpdateRangedAttack();
         }
     }
 }

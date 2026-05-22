@@ -1,4 +1,3 @@
-using UnityEngine;
 using App.Services;
 
 namespace Presentation.AI
@@ -18,50 +17,7 @@ namespace Presentation.AI
 
         public void Update()
         {
-            var entity = _behaviour.EnemyView.GetEntity();
-
-            float hpPercent =
-                (float)entity.CurrentHP / entity.MaxHP;
-
-            if (hpPercent < 0.3f)
-            {
-                _behaviour.StateMachine.ChangeState(
-                    _behaviour.StateFactory.CreateFlee(_behaviour));
-
-                return;
-            }
-
-            // Если игрок слишком далеко — возвращаемся в Idle
-            if (_behaviour.CombatEvaluator.IsTargetLost(
-                _behaviour.Self,
-                _behaviour.Player,
-                _behaviour.DetectionRadius))
-            {
-                _behaviour.StateMachine.ChangeState(
-                    _behaviour.StateFactory.CreateIdle(_behaviour));
-                return;
-            }
-
-            // Если игрок рядом — начинаем атаку
-            if (_behaviour.CombatEvaluator.CanMeleeAttack(
-                _behaviour.Self,
-                _behaviour.Player,
-                _behaviour.AttackRadius))
-            {
-                _behaviour.StateMachine.ChangeState(
-                    _behaviour.StateFactory.CreateAttack(_behaviour));
-                return;
-            }
-
-            // Направление на игрока
-            _behaviour.MovementService.RotateTo(
-                _behaviour.Self,
-                _behaviour.Player.position);
-
-            // Движение через NavMesh
-            _behaviour.MovementService.MoveTo(
-                _behaviour.Agent,
-                _behaviour.Player.position);
+            _behaviour.TickChase();
         }
 
         public void Exit() { }

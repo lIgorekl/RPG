@@ -51,17 +51,15 @@ namespace Gameplay.Combat
 
             if (behaviour is BossBehaviour bossBehaviour)
             {
-                behaviour.StateMachine.ChangeState(
-                    behaviour.StateFactory.CreateBossStun(
-                        bossBehaviour,
-                        stunDuration));
+                bossBehaviour.EnterStun(
+                    stunDuration);
             }
             else
             {
-                behaviour.StateMachine.ChangeState(
-                    new StunState(
-                        behaviour,
-                        stunDuration));
+                ((MeleeEnemyStateMachine)behaviour.StateMachine)
+                    .EnterStun(
+                        (BaseCombatEnemyBehaviour)behaviour,
+                        stunDuration);
             }
         }
     }

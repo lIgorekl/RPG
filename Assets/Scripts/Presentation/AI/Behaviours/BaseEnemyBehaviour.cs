@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
 using Presentation.Scene;
-using App;
 using App.Services;
 using Gameplay.AI;
 
@@ -12,15 +11,14 @@ namespace Presentation.AI
     public abstract class BaseEnemyBehaviour : MonoBehaviour, IEnemyBehaviour
     {
         // Основные компоненты AI
-        protected EnemyStateMachine _stateMachine;
-        protected EnemyStateFactory _stateFactory;
+        protected EnemyStateMachineBase _stateMachine;
         protected BaseEnemyView _enemyView;
         protected NavMeshAgent _agent;
-        protected IGameModeService _gameModeService;
         protected IAggroPolicy _aggroPolicy;
         protected EnemyWanderService _wanderService;
         protected EnemyMovementService _movementService;
         protected EnemyCombatEvaluator _combatEvaluator;
+        private IGameModeService _gameModeService;
 
         [SerializeField] protected Transform _player;
 
@@ -28,8 +26,7 @@ namespace Presentation.AI
         public Transform Player => _player;
         public Transform Self => transform;
         public BaseEnemyView EnemyView => _enemyView;
-        public EnemyStateMachine StateMachine => _stateMachine;
-        public EnemyStateFactory StateFactory => _stateFactory;
+        public EnemyStateMachineBase StateMachine => _stateMachine;
         public NavMeshAgent Agent => _agent;
         public IGameModeService GameModeService => _gameModeService;
         public IAggroPolicy AggroPolicy => _aggroPolicy;
@@ -39,17 +36,20 @@ namespace Presentation.AI
 
         // Радиус обнаружения задаётся в конкретных типах врагов
         public abstract float DetectionRadius { get; }
-        public abstract IEnemyState CreateDefaultState();
 
-        protected virtual void Awake()
+        public void Initialize(
+            IGameModeService gameModeService)
         {
-            _stateMachine = new EnemyStateMachine();
-            _stateFactory = new EnemyStateFactory();
+            _gameModeService = gameModeService;
+
             _wanderService = new EnemyWanderService();
+
             _movementService = new EnemyMovementService();
+
             _combatEvaluator = new EnemyCombatEvaluator();
 
             _enemyView = GetComponent<BaseEnemyView>();
+
             _agent = GetComponent<NavMeshAgent>();
         }
 
@@ -72,9 +72,9 @@ namespace Presentation.AI
                     _agent.Warp(hit.position);
                 }
             }
-            _gameModeService = GameEntryPoint.Instance.GetGameModeService();
 
-            if (_gameModeService.CurrentMode == GameMode.Peaceful)
+            if (_gameModeService != null &&
+                _gameModeService.CurrentMode == GameMode.Peaceful)
             {
                 _aggroPolicy = new PeacefulAggroPolicy();
             }

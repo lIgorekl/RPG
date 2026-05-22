@@ -84,5 +84,49 @@ namespace Gameplay.AI
 
             return false;
         }
+
+        public void MaintainDistance(
+            NavMeshAgent agent,
+            Transform self,
+            Transform target,
+            float minDistance,
+            float maxDistance,
+            float moveSpeed)
+        {
+            if (agent == null)
+                return;
+
+            float distance =
+                Vector3.Distance(
+                    self.position,
+                    target.position);
+
+            agent.speed = moveSpeed;
+
+            // слишком близко → убегаем
+            if (distance < minDistance)
+            {
+                Vector3 direction =
+                    (self.position - target.position).normalized;
+
+                Vector3 destination =
+                    self.position + direction * minDistance;
+
+                agent.SetDestination(destination);
+
+                return;
+            }
+
+            // слишком далеко → подходим
+            if (distance > maxDistance)
+            {
+                agent.SetDestination(target.position);
+
+                return;
+            }
+
+            // нормальная дистанция
+            agent.ResetPath();
+        }
     }
 }

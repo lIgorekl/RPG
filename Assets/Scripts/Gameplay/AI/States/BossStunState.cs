@@ -1,44 +1,41 @@
-using UnityEngine;
-
 namespace Presentation.AI
 {
     public class BossStunState : IEnemyState
     {
         private readonly BossBehaviour _behaviour;
+
         private float _timer;
 
-        public BossStunState(BossBehaviour behaviour, float duration)
+        public BossStunState(
+            BossBehaviour behaviour,
+            float duration)
         {
             _behaviour = behaviour;
-            _timer = 2f;
+            _timer = duration;
         }
 
         public void Enter()
         {
-            Debug.Log("BOSS STUN");
-
-            _behaviour.MovementService.Stop(_behaviour.Agent);
+            _behaviour.MovementService.Stop(
+                _behaviour.Agent);
 
             if (_behaviour.EnemyView.Animator != null)
             {
-                _behaviour.EnemyView.Animator.SetTrigger("Hurt");
+                _behaviour.EnemyView.Animator
+                    .SetTrigger("Hurt");
             }
         }
 
         public void Update()
         {
-            _timer -= Time.deltaTime;
-
-            if (_timer <= 0f)
-            {
-                _behaviour.StateMachine.ChangeState(
-                    _behaviour.StateFactory.CreateBossChase(_behaviour));
-            }
+            _behaviour.TickStun(
+                ref _timer);
         }
 
         public void Exit()
         {
-            _behaviour.MovementService.Resume(_behaviour.Agent);
+            _behaviour.MovementService.Resume(
+                _behaviour.Agent);
         }
     }
 }

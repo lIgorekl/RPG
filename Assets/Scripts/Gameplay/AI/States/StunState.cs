@@ -1,14 +1,14 @@
-using UnityEngine;
-using App.Services;
-
 namespace Presentation.AI
 {
     public class StunState : IEnemyState
     {
-        private BaseEnemyBehaviour _behaviour;
+        private readonly BaseCombatEnemyBehaviour _behaviour;
+
         private float _timer;
 
-        public StunState(BaseEnemyBehaviour behaviour, float duration)
+        public StunState(
+            BaseCombatEnemyBehaviour behaviour,
+            float duration)
         {
             _behaviour = behaviour;
             _timer = duration;
@@ -16,25 +16,18 @@ namespace Presentation.AI
 
         public void Enter()
         {
-            if (_behaviour.Agent != null)
-                _behaviour.Agent.isStopped = true;
+            _behaviour.EnterStun();
         }
 
         public void Update()
         {
-            _timer -= Time.deltaTime;
-
-            if (_timer <= 0f)
-            {
-                _behaviour.StateMachine.ChangeState(
-                    _behaviour.CreateDefaultState());
-            }
+            _behaviour.TickStun(
+                ref _timer);
         }
 
         public void Exit()
         {
-            if (_behaviour.Agent != null)
-                _behaviour.Agent.isStopped = false;
+            _behaviour.ExitStun();
         }
     }
 }

@@ -17,7 +17,8 @@ namespace Presentation.AI
             return new AttackState(behaviour);
         }
 
-        public FleeState CreateFlee(BaseEnemyBehaviour behaviour)
+        public FleeState CreateFlee(
+            BaseCombatEnemyBehaviour behaviour)
         {
             return new FleeState(behaviour);
         }
@@ -81,6 +82,15 @@ namespace Presentation.AI
             BossBehaviour behaviour)
         {
             return new BossEnrageState(behaviour);
+        }
+
+        public StunState CreateStun(
+            BaseCombatEnemyBehaviour behaviour,
+            float duration)
+        {
+            return new StunState(
+                behaviour,
+                duration);
         }
     }
 }
