@@ -49,17 +49,10 @@ namespace Gameplay.Combat
             if (hpPercent < 0.3f)
                 return;
 
-            if (behaviour is BossBehaviour bossBehaviour)
+            if (behaviour is BaseCombatEnemyBehaviour combatBehaviour)
             {
-                bossBehaviour.EnterStun(
+                combatBehaviour.EnterStunState(
                     stunDuration);
-            }
-            else
-            {
-                ((MeleeEnemyStateMachine)behaviour.StateMachine)
-                    .EnterStun(
-                        (BaseCombatEnemyBehaviour)behaviour,
-                        stunDuration);
             }
         }
     }

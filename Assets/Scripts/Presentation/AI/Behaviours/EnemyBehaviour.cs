@@ -101,71 +101,10 @@ namespace Presentation.AI
             EnemyView.Attack(Player);
         }
 
-        public void TickIdle(
-            ref float wanderTimer,
-            float wanderDelay)
+        public override void EnterStunState(float duration)
         {
-            if (ShouldChasePlayer())
-            {
-                ((MeleeEnemyStateMachine)StateMachine)
-                    .EnterChase(this);
-                return;
-            }
-
-            if (ShouldFlee())
-            {
-                if (CombatEvaluator.IsTargetDetected(
-                    Self,
-                    Player,
-                    DetectionRadius))
-                {
-                    ((MeleeEnemyStateMachine)StateMachine)
-                        .EnterFlee(this);
-                    return;
-                }
-            }
-
-            UpdateIdle(
-                ref wanderTimer,
-                wanderDelay);
-        }
-
-        public void TickChase()
-        {
-            if (ShouldFlee())
-            {
-                ((MeleeEnemyStateMachine)StateMachine)
-                    .EnterFlee(this);
-                return;
-            }
-
-            if (ShouldReturnToIdle())
-            {
-                ((MeleeEnemyStateMachine)StateMachine)
-                    .EnterIdle(this);
-                return;
-            }
-
-            if (ShouldAttackPlayer())
-            {
-                ((MeleeEnemyStateMachine)StateMachine)
-                    .EnterAttack(this);
-                return;
-            }
-
-            UpdateChase();
-        }
-
-        public void TickAttack()
-        {
-            if (ShouldStopAttack())
-            {
-                ((MeleeEnemyStateMachine)StateMachine)
-                    .EnterChase(this);
-                return;
-            }
-
-            UpdateAttack();
+            ((MeleeEnemyStateMachine)_stateMachine)
+                .EnterStun(this, duration);
         }
     }
 }

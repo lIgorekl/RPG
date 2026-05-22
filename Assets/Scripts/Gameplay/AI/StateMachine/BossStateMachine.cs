@@ -3,11 +3,11 @@ namespace Presentation.AI
     public class BossStateMachine
         : EnemyStateMachineBase
     {
-        private readonly EnemyStateFactory _factory;
+        private readonly BossStateFactory _factory;
 
         public BossStateMachine()
         {
-            _factory = new EnemyStateFactory();
+            _factory = new BossStateFactory();
         }
 
         public override void EnterDefaultState(
@@ -19,31 +19,31 @@ namespace Presentation.AI
         public void EnterBossIdle(BossBehaviour behaviour)
         {
             ChangeState(
-                _factory.CreateBossIdle(behaviour));
+                _factory.CreateIdle(behaviour));
         }
 
         public void EnterBossChase(BossBehaviour behaviour)
         {
             ChangeState(
-                _factory.CreateBossChase(behaviour));
+                _factory.CreateChase(behaviour));
         }
 
         public void EnterBossAttack(BossBehaviour behaviour)
         {
             ChangeState(
-                _factory.CreateBossAttack(behaviour));
+                _factory.CreateAttack(behaviour));
         }
 
         public void EnterBossHeavyAttack(BossBehaviour behaviour)
         {
             ChangeState(
-                _factory.CreateBossHeavyAttack(behaviour));
+                _factory.CreateHeavyAttack(behaviour));
         }
 
         public void EnterBossRecover(BossBehaviour behaviour)
         {
             ChangeState(
-                _factory.CreateBossRecover(behaviour));
+                _factory.CreateRecover(behaviour));
         }
 
         public void EnterBossStun(
@@ -51,7 +51,7 @@ namespace Presentation.AI
             float duration)
         {
             ChangeState(
-                _factory.CreateBossStun(
+                _factory.CreateStun(
                     behaviour,
                     duration));
         }
@@ -59,7 +59,7 @@ namespace Presentation.AI
         public void EnterBossEnrage(BossBehaviour behaviour)
         {
             ChangeState(
-                _factory.CreateBossEnrage(behaviour));
+                _factory.CreateEnrage(behaviour));
         }
     }
 }

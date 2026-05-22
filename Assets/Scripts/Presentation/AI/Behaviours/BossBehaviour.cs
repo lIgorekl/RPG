@@ -308,5 +308,10 @@ namespace Presentation.AI
                 EnterChase();
             }
         }
+
+        public void EnterStunState(float duration)
+        {
+            EnterStun(duration);
+        }
     }
 }

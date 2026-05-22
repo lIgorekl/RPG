@@ -3,18 +3,18 @@ namespace Presentation.AI
     public class RangedEnemyStateMachine
         : EnemyStateMachineBase
     {
-        private readonly EnemyStateFactory _factory;
+        private readonly RangedEnemyStateFactory _factory;
 
         public RangedEnemyStateMachine()
         {
-            _factory = new EnemyStateFactory();
+            _factory = new RangedEnemyStateFactory(this);
         }
 
         public void EnterRangedIdle(
             RangedEnemyBehaviour behaviour)
         {
             ChangeState(
-                _factory.CreateRangedIdle(behaviour));
+                _factory.CreateIdle(behaviour));
         }
 
         public void EnterMaintainDistance(
@@ -28,7 +28,7 @@ namespace Presentation.AI
             RangedEnemyBehaviour behaviour)
         {
             ChangeState(
-                _factory.CreateRangedAttack(behaviour));
+                _factory.CreateAttack(behaviour));
         }
 
         public void EnterFlee(

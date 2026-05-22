@@ -5,14 +5,17 @@ namespace Presentation.AI
     public class RangedAttackState : IEnemyState
     {
         private readonly RangedEnemyBehaviour _behaviour;
+        private readonly RangedEnemyStateMachine _stateMachine;
 
         private float _cooldown = 2f;
         private float _timer;
 
         public RangedAttackState(
-            RangedEnemyBehaviour behaviour)
+            RangedEnemyBehaviour behaviour,
+            RangedEnemyStateMachine stateMachine)
         {
             _behaviour = behaviour;
+            _stateMachine = stateMachine;
         }
 
         public void Enter()
@@ -26,9 +29,7 @@ namespace Presentation.AI
         {
             if (_behaviour.ShouldStopRangedAttack())
             {
-                ((RangedEnemyStateMachine)_behaviour.StateMachine)
-                    .EnterMaintainDistance(_behaviour);
-
+                _stateMachine.EnterMaintainDistance(_behaviour);
                 return;
             }
 

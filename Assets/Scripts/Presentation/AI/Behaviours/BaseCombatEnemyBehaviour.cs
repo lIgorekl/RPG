@@ -149,5 +149,9 @@ namespace Presentation.AI
         {
             MovementService.Resume(Agent);
         }
+
+        public virtual void EnterStunState(float duration)
+        {
+        }
     }
 }

@@ -141,65 +141,10 @@ namespace Presentation.AI
                 DetectionRadius);
         }
 
-        public void TickIdle(
-            ref float wanderTimer,
-            float wanderDelay)
+        public override void EnterStunState(float duration)
         {
-            if (ShouldMaintainDistance())
-            {
-                ((RangedEnemyStateMachine)StateMachine).EnterMaintainDistance(this);
-                return;
-            }
-
-            if (ShouldFlee())
-            {
-                if (CombatEvaluator.IsTargetDetected(
-                    Self,
-                    Player,
-                    DetectionRadius))
-                {
-                    ((RangedEnemyStateMachine)StateMachine).EnterFlee(this);
-                    return;
-                }
-            }
-
-            UpdateIdle(
-                ref wanderTimer,
-                wanderDelay);
-        }
-
-        public void TickMaintainDistance()
-        {
-            if (ShouldFlee())
-            {
-                ((RangedEnemyStateMachine)StateMachine).EnterFlee(this);
-                return;
-            }
-
-            if (ShouldReturnToRangedIdle())
-            {
-                ((RangedEnemyStateMachine)StateMachine).EnterRangedIdle(this);
-                return;
-            }
-
-            if (ShouldStartRangedAttack())
-            {
-                ((RangedEnemyStateMachine)StateMachine).EnterRangedAttack(this);
-                return;
-            }
-
-            UpdateMaintainDistance();
-        }
-
-        public void TickAttack()
-        {
-            if (ShouldStopRangedAttack())
-            {
-                ((RangedEnemyStateMachine)StateMachine).EnterMaintainDistance(this);
-                return;
-            }
-
-            UpdateRangedAttack();
+            ((RangedEnemyStateMachine)_stateMachine)
+                .EnterStun(this, duration);
         }
     }
 }

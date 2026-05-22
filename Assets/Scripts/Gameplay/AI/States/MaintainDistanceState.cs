@@ -1,24 +1,41 @@
-using UnityEngine;
-using App.Services;
-
 namespace Presentation.AI
 {
-    // Состояние удержания дистанции для дальнего врага.
-    // Враг старается держаться между MinDistance и MaxDistance от игрока.
     public class MaintainDistanceState : IEnemyState
     {
         private readonly RangedEnemyBehaviour _behaviour;
+        private readonly RangedEnemyStateMachine _stateMachine;
 
-        public MaintainDistanceState(RangedEnemyBehaviour behaviour)
+        public MaintainDistanceState(
+            RangedEnemyBehaviour behaviour,
+            RangedEnemyStateMachine stateMachine)
         {
             _behaviour = behaviour;
+            _stateMachine = stateMachine;
         }
 
         public void Enter() { }
 
         public void Update()
         {
-            _behaviour.TickMaintainDistance();
+            if (_behaviour.ShouldFlee())
+            {
+                _stateMachine.EnterFlee(_behaviour);
+                return;
+            }
+
+            if (_behaviour.ShouldReturnToRangedIdle())
+            {
+                _stateMachine.EnterRangedIdle(_behaviour);
+                return;
+            }
+
+            if (_behaviour.ShouldStartRangedAttack())
+            {
+                _stateMachine.EnterRangedAttack(_behaviour);
+                return;
+            }
+
+            _behaviour.UpdateMaintainDistance();
         }
 
         public void Exit() { }

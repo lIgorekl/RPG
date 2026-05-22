@@ -1,35 +1,35 @@
 namespace Presentation.AI
 {
-    public class MeleeEnemyStateFactory
+    public class RangedEnemyStateFactory
     {
-        private readonly MeleeEnemyStateMachine _stateMachine;
+        private readonly RangedEnemyStateMachine _stateMachine;
 
-        public MeleeEnemyStateFactory(
-            MeleeEnemyStateMachine stateMachine)
+        public RangedEnemyStateFactory(
+            RangedEnemyStateMachine stateMachine)
         {
             _stateMachine = stateMachine;
         }
 
-        public IdleState CreateIdle(
-            EnemyBehaviour behaviour)
+        public RangedIdleState CreateIdle(
+            RangedEnemyBehaviour behaviour)
         {
-            return new IdleState(
+            return new RangedIdleState(
                 behaviour,
                 _stateMachine);
         }
 
-        public ChaseState CreateChase(
-            EnemyBehaviour behaviour)
+        public MaintainDistanceState CreateMaintainDistance(
+            RangedEnemyBehaviour behaviour)
         {
-            return new ChaseState(
+            return new MaintainDistanceState(
                 behaviour,
                 _stateMachine);
         }
 
-        public AttackState CreateAttack(
-            EnemyBehaviour behaviour)
+        public RangedAttackState CreateAttack(
+            RangedEnemyBehaviour behaviour)
         {
-            return new AttackState(
+            return new RangedAttackState(
                 behaviour,
                 _stateMachine);
         }

@@ -5,14 +5,17 @@ namespace Presentation.AI
     public class AttackState : IEnemyState
     {
         private readonly EnemyBehaviour _behaviour;
+        private readonly MeleeEnemyStateMachine _stateMachine;
 
         private float _cooldown = 1f;
         private float _timer;
 
         public AttackState(
-            EnemyBehaviour behaviour)
+            EnemyBehaviour behaviour,
+            MeleeEnemyStateMachine stateMachine)
         {
             _behaviour = behaviour;
+            _stateMachine = stateMachine;
         }
 
         public void Enter()
@@ -26,9 +29,7 @@ namespace Presentation.AI
         {
             if (_behaviour.ShouldStopAttack())
             {
-                ((MeleeEnemyStateMachine)_behaviour.StateMachine)
-                    .EnterChase(_behaviour);
-
+                _stateMachine.EnterChase(_behaviour);
                 return;
             }
 

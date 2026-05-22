@@ -7,7 +7,7 @@ namespace Presentation.AI
 
         public MeleeEnemyStateMachine()
         {
-            _factory = new MeleeEnemyStateFactory();
+            _factory = new MeleeEnemyStateFactory(this);
         }
 
         public void EnterIdle(
