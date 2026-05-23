@@ -4,8 +4,10 @@ using App.Services.Spawn;
 using App.SaveLoad;
 using App.Repositories;
 using App.Events;
+using App.Services.Score;
 using Presentation.Player;
 using Presentation.Scene;
+using Presentation.UI;
 using System.Collections.Generic;
 using Presentation.AI;
 
@@ -25,9 +27,14 @@ namespace App
         [Header("Game Events")]
         [SerializeField] private GameEventsSettings gameEventsSettings;
 
+        [Header("Score")]
+        [SerializeField] private ScoreSettings scoreSettings;
+        [SerializeField] private ScoreboardView scoreboardView;
+
         private readonly List<BaseEnemyView> _registeredEnemies = new();
         private SaveLoadInteractor _saveLoadInteractor;
         private ISaveService _saveService;
+        private IGameEventBus _eventBus;
         private GameEventsInstaller _gameEventsInstaller;
 
         private void Awake()
@@ -90,8 +97,13 @@ namespace App
                     "GameSceneEntryPoint: VictoryMusic is not assigned in GameEventsSettings.");
             }
 
+            _eventBus = new GameEventBus();
+
+            if (scoreSettings != null)
+                new ScoreService(_eventBus, scoreSettings);
+
             _gameEventsInstaller = new GameEventsInstaller(
-                new GameEventBus(),
+                _eventBus,
                 gameEventsSettings,
                 audioService,
                 this,
@@ -100,6 +112,19 @@ namespace App
 
             foreach (var enemy in _registeredEnemies)
                 _gameEventsInstaller.RegisterEnemy(enemy);
+
+            InitializeScoreboard();
+        }
+
+        private void InitializeScoreboard()
+        {
+            if (scoreboardView == null)
+                scoreboardView = FindFirstObjectByType<ScoreboardView>();
+
+            if (scoreboardView == null || _eventBus == null)
+                return;
+
+            scoreboardView.Initialize(_eventBus);
         }
 
         public void RegisterSpawnedEnemy(BaseEnemyView enemy)
