@@ -13,9 +13,14 @@ namespace Presentation.UI
 
         private void Start()
         {
+            if (enemyView == null)
+                enemyView = GetComponentInParent<BaseEnemyView>();
+
             if (enemyView == null || hpFill == null)
             {
-                Debug.LogError("EnemyHealthBarView not configured");
+                Debug.LogError(
+                    $"{name}: EnemyHealthBarView not configured " +
+                    $"(enemyView={enemyView != null}, hpFill={hpFill != null})");
                 return;
             }
 
@@ -23,7 +28,6 @@ namespace Presentation.UI
 
             entity.HealthChanged += OnHealthChanged;
 
-            // Инициализируем текущее состояние HP
             OnHealthChanged(entity.CurrentHP, entity.MaxHP);
         }
 

@@ -45,6 +45,12 @@ namespace Presentation.AI
 
             if (_timer <= 0f)
             {
+                if (!behaviour.ShouldAttack())
+                {
+                    _stateMachine.EnterChase();
+                    return;
+                }
+
                 PerformAttack(behaviour);
                 _timer = _cooldown;
             }

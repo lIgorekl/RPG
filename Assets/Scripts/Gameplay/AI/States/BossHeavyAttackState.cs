@@ -30,12 +30,24 @@ namespace Presentation.AI
             var behaviour =
                 _stateMachine.BossBehaviour;
 
+            if (!behaviour.ShouldAttack())
+            {
+                _stateMachine.EnterChase();
+                return;
+            }
+
             _timer -=
                 Time.deltaTime *
                 behaviour.AttackSpeedMultiplier;
 
             if (_timer <= 0f)
             {
+                if (!behaviour.ShouldAttack())
+                {
+                    _stateMachine.EnterChase();
+                    return;
+                }
+
                 behaviour.EnemyView.Attack(
                     behaviour.Player,
                     behaviour.HeavyAttackDamageMultiplier,

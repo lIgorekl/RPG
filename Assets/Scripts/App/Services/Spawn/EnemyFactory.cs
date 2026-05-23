@@ -21,16 +21,16 @@ namespace App.Services.Spawn
                 position,
                 rotation);
 
+            var view = instance.GetComponent<BaseEnemyView>();
+
+            if (view == null && definition.IsBoss)
+                view = instance.AddComponent<BossEnemyView>();
+
             if (random != null)
             {
                 EnemyWeaponAssigner.AssignRandomWeapon(instance, random);
                 BossVariantAssigner.AssignRandomVariants(instance, random);
             }
-
-            var view = instance.GetComponent<BaseEnemyView>();
-
-            if (view == null && definition.IsBoss)
-                view = instance.AddComponent<BossEnemyView>();
 
             if (view == null)
             {

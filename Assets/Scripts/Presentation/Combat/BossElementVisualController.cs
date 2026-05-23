@@ -12,13 +12,21 @@ namespace Presentation.Combat
             if (config == null)
                 return;
 
+            var color = config.ParticleColor;
+
             foreach (var particleSystem in ResolveParticleSystems())
             {
                 if (particleSystem == null)
                     continue;
 
                 var main = particleSystem.main;
-                main.startColor = config.ParticleColor;
+                main.startColor = color;
+
+                var renderer =
+                    particleSystem.GetComponent<ParticleSystemRenderer>();
+
+                if (renderer != null && renderer.material != null)
+                    renderer.material.color = color;
 
                 if (!particleSystem.isPlaying)
                     particleSystem.Play();

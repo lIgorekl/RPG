@@ -1328,7 +1328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99a69ed76bb396a43bc400716b003215, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyView: {fileID: 0}
+  enemyView: {fileID: 8234567890123456789}
   hpFill: {fileID: 2387656450046509851}
 --- !u!114 &3974889648027824254
 MonoBehaviour:
@@ -2663,8 +2663,10 @@ GameObject:
   - component: {fileID: 6260096888558937858}
   - component: {fileID: 3675572693187100576}
   - component: {fileID: 4612991446226527443}
+  - component: {fileID: 8234567890123456789}
   - component: {fileID: -1749323085560465845}
   - component: {fileID: 6964923076022620672}
+  - component: {fileID: 5624692143584856037}
   m_Layer: 0
   m_Name: Boss
   m_TagString: Enemy
@@ -2788,6 +2790,24 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &8234567890123456789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7806538930925831115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4987e5d49045fae4f8d94ce3487236a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 200
+  physicalDamage: 25
+  magicalDamage: 0
+  animator: {fileID: 0}
+  stunDuration: 0.6
+  enemyId: boss
 --- !u!114 &-1749323085560465845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2820,6 +2840,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   particleSystems:
   - {fileID: 6482055487657571600}
+--- !u!114 &5624692143584856037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7806538930925831115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4987e5d49045fae4f8d94ce3487236a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 50
+  physicalDamage: 10
+  magicalDamage: 0
+  animator: {fileID: 0}
+  stunDuration: 0.6
+  enemyId: boss
 --- !u!1 &8033572164293803054
 GameObject:
   m_ObjectHideFlags: 0
@@ -7632,7 +7670,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 10301, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7676,7 +7714,7 @@ ParticleSystemRenderer:
   m_VertexStreams: 00010304
   m_UseCustomTrailVertexStreams: 0
   m_TrailVertexStreams: 00010304
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}

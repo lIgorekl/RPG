@@ -22,6 +22,7 @@ namespace Presentation.AI
         private bool _isEnraged;
         private bool _variantsAssigned;
         private EnemyWeapon _currentWeapon;
+        private BossElementConfig _currentElement;
 
         public float AttackRadius => attackRadius;
 
@@ -53,6 +54,8 @@ namespace Presentation.AI
 
         public void SetElement(BossElementConfig config)
         {
+            _currentElement = config;
+
             if (elementVisuals == null)
                 elementVisuals =
                     GetComponent<BossElementVisualController>();
@@ -75,6 +78,9 @@ namespace Presentation.AI
         {
             if (!_variantsAssigned)
                 AssignRandomVariants(new System.Random());
+
+            if (_currentElement != null)
+                SetElement(_currentElement);
 
             _stateMachine =
                 new BossStateMachine(this);
