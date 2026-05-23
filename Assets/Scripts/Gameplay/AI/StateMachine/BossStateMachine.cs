@@ -5,61 +5,55 @@ namespace Presentation.AI
     {
         private readonly BossStateFactory _factory;
 
-        public BossStateMachine()
+        public BossBehaviour BossBehaviour =>
+            (BossBehaviour)Behaviour;
+
+        public BossStateMachine(
+            BossBehaviour behaviour)
+            : base(behaviour)
         {
-            _factory = new BossStateFactory();
+            _factory = new BossStateFactory(this);
         }
 
-        public override void EnterDefaultState(
-            BaseEnemyBehaviour behaviour)
+        public void EnterIdle()
         {
-            EnterBossIdle((BossBehaviour)behaviour);
+            ChangeState(_factory.CreateIdle());
         }
 
-        public void EnterBossIdle(BossBehaviour behaviour)
+        public void EnterChase()
+        {
+            ChangeState(_factory.CreateChase());
+        }
+
+        public void EnterAttack()
+        {
+            ChangeState(_factory.CreateAttack());
+        }
+
+        public void EnterHeavyAttack()
+        {
+            ChangeState(_factory.CreateHeavyAttack());
+        }
+
+        public void EnterRecover()
+        {
+            ChangeState(_factory.CreateRecover());
+        }
+
+        public void EnterStun(float duration)
         {
             ChangeState(
-                _factory.CreateIdle(behaviour));
+                _factory.CreateStun(duration));
         }
 
-        public void EnterBossChase(BossBehaviour behaviour)
+        public void EnterEnrage()
         {
-            ChangeState(
-                _factory.CreateChase(behaviour));
+            ChangeState(_factory.CreateEnrage());
         }
 
-        public void EnterBossAttack(BossBehaviour behaviour)
+        public override void EnterDefaultState()
         {
-            ChangeState(
-                _factory.CreateAttack(behaviour));
-        }
-
-        public void EnterBossHeavyAttack(BossBehaviour behaviour)
-        {
-            ChangeState(
-                _factory.CreateHeavyAttack(behaviour));
-        }
-
-        public void EnterBossRecover(BossBehaviour behaviour)
-        {
-            ChangeState(
-                _factory.CreateRecover(behaviour));
-        }
-
-        public void EnterBossStun(
-            BossBehaviour behaviour,
-            float duration)
-        {
-            ChangeState(
-                _factory.CreateStun(
-                    behaviour,
-                    duration));
-        }
-
-        public void EnterBossEnrage(BossBehaviour behaviour)
-        {
-            ChangeState(
-                _factory.CreateEnrage(behaviour));
+            EnterIdle();
         }
     }
 }

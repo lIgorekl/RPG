@@ -4,36 +4,60 @@ namespace Presentation.AI
 {
     public class BossAttackState : IEnemyState
     {
-        private readonly BossBehaviour _behaviour;
+        private readonly BossStateMachine _stateMachine;
 
         private float _cooldown = 1.5f;
         private float _timer;
 
         public BossAttackState(
-            BossBehaviour behaviour)
+            BossStateMachine stateMachine)
         {
-            _behaviour = behaviour;
+            _stateMachine = stateMachine;
         }
 
         public void Enter()
         {
             _timer = _cooldown;
 
-            _behaviour.MovementService.Stop(
-                _behaviour.Agent);
+            var behaviour =
+                _stateMachine.BossBehaviour;
+
+            behaviour.MovementService.Stop(
+                behaviour.Agent);
         }
 
         public void Update()
         {
-            _behaviour.TickAttack(
-                ref _timer,
-                _cooldown);
+            var behaviour =
+                _stateMachine.BossBehaviour;
+
+            if (!behaviour.ShouldAttack())
+            {
+                _stateMachine.EnterChase();
+                return;
+            }
+
+            _timer -=
+                Time.deltaTime *
+                behaviour.AttackSpeedMultiplier;
+
+            if (_timer <= 0f)
+            {
+                behaviour.EnemyView.Attack(
+                    behaviour.Player,
+                    1f);
+
+                _timer = _cooldown;
+            }
         }
 
         public void Exit()
         {
-            _behaviour.MovementService.Resume(
-                _behaviour.Agent);
+            var behaviour =
+                _stateMachine.BossBehaviour;
+
+            behaviour.MovementService.Resume(
+                behaviour.Agent);
         }
     }
 }

@@ -4,17 +4,14 @@ namespace Presentation.AI
 {
     public class AttackState : IEnemyState
     {
-        private readonly EnemyBehaviour _behaviour;
         private readonly MeleeEnemyStateMachine _stateMachine;
 
         private float _cooldown = 1f;
         private float _timer;
 
         public AttackState(
-            EnemyBehaviour behaviour,
             MeleeEnemyStateMachine stateMachine)
         {
-            _behaviour = behaviour;
             _stateMachine = stateMachine;
         }
 
@@ -22,14 +19,17 @@ namespace Presentation.AI
         {
             _timer = 0f;
 
-            _behaviour.EnterAttack();
+            _stateMachine.EnemyBehaviour.EnterAttack();
         }
 
         public void Update()
         {
-            if (_behaviour.ShouldStopAttack())
+            var behaviour =
+                _stateMachine.EnemyBehaviour;
+
+            if (behaviour.ShouldStopAttack())
             {
-                _stateMachine.EnterChase(_behaviour);
+                _stateMachine.EnterChase();
                 return;
             }
 
@@ -37,7 +37,7 @@ namespace Presentation.AI
 
             if (_timer <= 0f)
             {
-                _behaviour.UpdateAttack();
+                behaviour.UpdateAttack();
 
                 _timer = _cooldown;
             }
@@ -45,7 +45,7 @@ namespace Presentation.AI
 
         public void Exit()
         {
-            _behaviour.ExitAttack();
+            _stateMachine.EnemyBehaviour.ExitAttack();
         }
     }
 }

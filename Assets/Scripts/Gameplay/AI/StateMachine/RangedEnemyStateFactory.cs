@@ -10,42 +10,30 @@ namespace Presentation.AI
             _stateMachine = stateMachine;
         }
 
-        public RangedIdleState CreateIdle(
-            RangedEnemyBehaviour behaviour)
+        public RangedIdleState CreateIdle()
         {
-            return new RangedIdleState(
-                behaviour,
-                _stateMachine);
+            return new RangedIdleState(_stateMachine);
         }
 
-        public MaintainDistanceState CreateMaintainDistance(
-            RangedEnemyBehaviour behaviour)
+        public MaintainDistanceState CreateMaintainDistance()
         {
-            return new MaintainDistanceState(
-                behaviour,
-                _stateMachine);
+            return new MaintainDistanceState(_stateMachine);
         }
 
-        public RangedAttackState CreateAttack(
-            RangedEnemyBehaviour behaviour)
+        public RangedAttackState CreateAttack()
         {
-            return new RangedAttackState(
-                behaviour,
-                _stateMachine);
+            return new RangedAttackState(_stateMachine);
         }
 
-        public FleeState CreateFlee(
-            BaseCombatEnemyBehaviour behaviour)
+        public FleeState CreateFlee()
         {
-            return new FleeState(behaviour);
+            return new FleeState(_stateMachine);
         }
 
-        public StunState CreateStun(
-            BaseCombatEnemyBehaviour behaviour,
-            float duration)
+        public StunState CreateStun(float duration)
         {
             return new StunState(
-                behaviour,
+                _stateMachine,
                 duration);
         }
     }

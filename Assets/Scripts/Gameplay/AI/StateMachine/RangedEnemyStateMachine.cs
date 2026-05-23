@@ -5,54 +5,46 @@ namespace Presentation.AI
     {
         private readonly RangedEnemyStateFactory _factory;
 
-        public RangedEnemyStateMachine()
+        public RangedEnemyBehaviour RangedBehaviour =>
+            (RangedEnemyBehaviour)Behaviour;
+
+        public RangedEnemyStateMachine(
+            RangedEnemyBehaviour behaviour)
+            : base(behaviour)
         {
             _factory = new RangedEnemyStateFactory(this);
         }
 
-        public void EnterRangedIdle(
-            RangedEnemyBehaviour behaviour)
+        public void EnterRangedIdle()
         {
-            ChangeState(
-                _factory.CreateIdle(behaviour));
+            ChangeState(_factory.CreateIdle());
         }
 
-        public void EnterMaintainDistance(
-            RangedEnemyBehaviour behaviour)
+        public void EnterMaintainDistance()
         {
             ChangeState(
-                _factory.CreateMaintainDistance(behaviour));
+                _factory.CreateMaintainDistance());
         }
 
-        public void EnterRangedAttack(
-            RangedEnemyBehaviour behaviour)
+        public void EnterRangedAttack()
+        {
+            ChangeState(_factory.CreateAttack());
+        }
+
+        public void EnterFlee()
+        {
+            ChangeState(_factory.CreateFlee());
+        }
+
+        public void EnterStun(float duration)
         {
             ChangeState(
-                _factory.CreateAttack(behaviour));
+                _factory.CreateStun(duration));
         }
 
-        public void EnterFlee(
-            BaseCombatEnemyBehaviour behaviour)
+        public override void EnterDefaultState()
         {
-            ChangeState(
-                _factory.CreateFlee(behaviour));
-        }
-
-        public void EnterStun(
-            BaseCombatEnemyBehaviour behaviour,
-            float duration)
-        {
-            ChangeState(
-                _factory.CreateStun(
-                    behaviour,
-                    duration));
-        }
-
-        public override void EnterDefaultState(
-            BaseEnemyBehaviour behaviour)
-        {
-            EnterRangedIdle(
-                (RangedEnemyBehaviour)behaviour);
+            EnterRangedIdle();
         }
     }
 }

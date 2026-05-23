@@ -5,53 +5,45 @@ namespace Presentation.AI
     {
         private readonly MeleeEnemyStateFactory _factory;
 
-        public MeleeEnemyStateMachine()
+        public EnemyBehaviour EnemyBehaviour =>
+            (EnemyBehaviour)Behaviour;
+
+        public MeleeEnemyStateMachine(
+            EnemyBehaviour behaviour)
+            : base(behaviour)
         {
             _factory = new MeleeEnemyStateFactory(this);
         }
 
-        public void EnterIdle(
-            EnemyBehaviour behaviour)
+        public void EnterIdle()
         {
-            ChangeState(
-                _factory.CreateIdle(behaviour));
+            ChangeState(_factory.CreateIdle());
         }
 
-        public void EnterChase(
-            EnemyBehaviour behaviour)
+        public void EnterChase()
         {
-            ChangeState(
-                _factory.CreateChase(behaviour));
+            ChangeState(_factory.CreateChase());
         }
 
-        public void EnterAttack(
-            EnemyBehaviour behaviour)
+        public void EnterAttack()
         {
-            ChangeState(
-                _factory.CreateAttack(behaviour));
+            ChangeState(_factory.CreateAttack());
         }
 
-        public void EnterFlee(
-            BaseCombatEnemyBehaviour behaviour)
+        public void EnterFlee()
         {
-            ChangeState(
-                _factory.CreateFlee(behaviour));
+            ChangeState(_factory.CreateFlee());
         }
 
-        public void EnterStun(
-            BaseCombatEnemyBehaviour behaviour,
-            float duration)
+        public void EnterStun(float duration)
         {
             ChangeState(
-                _factory.CreateStun(
-                    behaviour,
-                    duration));
+                _factory.CreateStun(duration));
         }
 
-        public override void EnterDefaultState(
-            BaseEnemyBehaviour behaviour)
+        public override void EnterDefaultState()
         {
-            EnterIdle((EnemyBehaviour)behaviour);
+            EnterIdle();
         }
     }
 }

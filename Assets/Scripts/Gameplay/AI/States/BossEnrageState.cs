@@ -4,27 +4,31 @@ namespace Presentation.AI
 {
     public class BossEnrageState : IEnemyState
     {
-        private readonly BossBehaviour _behaviour;
+        private readonly BossStateMachine _stateMachine;
 
         private float _timer;
 
         public BossEnrageState(
-            BossBehaviour behaviour)
+            BossStateMachine stateMachine)
         {
-            _behaviour = behaviour;
+            _stateMachine = stateMachine;
         }
 
         public void Enter()
         {
             _timer = 3f;
 
-            _behaviour.SetEnraged(true);
+            _stateMachine.BossBehaviour.SetEnraged(true);
         }
 
         public void Update()
         {
-            _behaviour.TickEnrage(
-                ref _timer);
+            _timer -= Time.deltaTime;
+
+            if (_timer <= 0f)
+            {
+                _stateMachine.EnterChase();
+            }
         }
 
         public void Exit() { }

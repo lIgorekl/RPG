@@ -1,35 +1,47 @@
+using UnityEngine;
+
 namespace Presentation.AI
 {
     public class BossRecoverState : IEnemyState
     {
-        private readonly BossBehaviour _behaviour;
+        private readonly BossStateMachine _stateMachine;
 
         private float _timer;
 
         public BossRecoverState(
-            BossBehaviour behaviour)
+            BossStateMachine stateMachine)
         {
-            _behaviour = behaviour;
+            _stateMachine = stateMachine;
         }
 
         public void Enter()
         {
             _timer = 3f;
 
-            _behaviour.MovementService.Stop(
-                _behaviour.Agent);
+            var behaviour =
+                _stateMachine.BossBehaviour;
+
+            behaviour.MovementService.Stop(
+                behaviour.Agent);
         }
 
         public void Update()
         {
-            _behaviour.TickRecover(
-                ref _timer);
+            _timer -= Time.deltaTime;
+
+            if (_timer <= 0f)
+            {
+                _stateMachine.EnterChase();
+            }
         }
 
         public void Exit()
         {
-            _behaviour.MovementService.Resume(
-                _behaviour.Agent);
+            var behaviour =
+                _stateMachine.BossBehaviour;
+
+            behaviour.MovementService.Resume(
+                behaviour.Agent);
         }
     }
 }

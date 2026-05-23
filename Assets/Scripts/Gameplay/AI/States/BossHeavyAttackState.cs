@@ -1,35 +1,57 @@
+using UnityEngine;
+
 namespace Presentation.AI
 {
     public class BossHeavyAttackState : IEnemyState
     {
-        private readonly BossBehaviour _behaviour;
+        private readonly BossStateMachine _stateMachine;
 
         private float _timer;
 
         public BossHeavyAttackState(
-            BossBehaviour behaviour)
+            BossStateMachine stateMachine)
         {
-            _behaviour = behaviour;
+            _stateMachine = stateMachine;
         }
 
         public void Enter()
         {
             _timer = 3f;
 
-            _behaviour.MovementService.Stop(
-                _behaviour.Agent);
+            var behaviour =
+                _stateMachine.BossBehaviour;
+
+            behaviour.MovementService.Stop(
+                behaviour.Agent);
         }
 
         public void Update()
         {
-            _behaviour.TickHeavyAttack(
-                ref _timer);
+            var behaviour =
+                _stateMachine.BossBehaviour;
+
+            _timer -=
+                Time.deltaTime *
+                behaviour.AttackSpeedMultiplier;
+
+            if (_timer <= 0f)
+            {
+                behaviour.EnemyView.Attack(
+                    behaviour.Player,
+                    2.5f,
+                    true);
+
+                _stateMachine.EnterRecover();
+            }
         }
 
         public void Exit()
         {
-            _behaviour.MovementService.Resume(
-                _behaviour.Agent);
+            var behaviour =
+                _stateMachine.BossBehaviour;
+
+            behaviour.MovementService.Resume(
+                behaviour.Agent);
         }
     }
 }

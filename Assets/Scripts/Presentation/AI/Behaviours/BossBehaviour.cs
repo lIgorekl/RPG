@@ -1,4 +1,5 @@
 using UnityEngine;
+using App.Services;
 
 namespace Presentation.AI
 {
@@ -24,11 +25,11 @@ namespace Presentation.AI
         protected override void Start()
         {
             _stateMachine =
-                new BossStateMachine();
+                new BossStateMachine(this);
 
             base.Start();
 
-            EnterIdle();
+            ((BossStateMachine)_stateMachine).EnterIdle();
         }
 
         protected override void Update()
@@ -77,72 +78,17 @@ namespace Presentation.AI
 
             if (shouldBeEnraged)
             {
-                EnterEnrage();
+                ((BossStateMachine)_stateMachine)
+                    .EnterEnrage();
             }
         }
-
-        /*
-         * =========================
-         * TRANSITIONS
-         * =========================
-         */
-
-        public void EnterIdle()
-        {
-            ((BossStateMachine)_stateMachine)
-                .EnterBossIdle(this);
-        }
-
-        public void EnterChase()
-        {
-            ((BossStateMachine)_stateMachine)
-                .EnterBossChase(this);
-        }
-
-        public void EnterAttack()
-        {
-            ((BossStateMachine)_stateMachine)
-                .EnterBossAttack(this);
-        }
-
-        public void EnterHeavyAttack()
-        {
-            ((BossStateMachine)_stateMachine)
-                .EnterBossHeavyAttack(this);
-        }
-
-        public void EnterRecover()
-        {
-            ((BossStateMachine)_stateMachine)
-                .EnterBossRecover(this);
-        }
-
-        public void EnterStun(float duration)
-        {
-            ((BossStateMachine)_stateMachine)
-                .EnterBossStun(
-                    this,
-                    duration);
-        }
-
-        public void EnterEnrage()
-        {
-            ((BossStateMachine)_stateMachine)
-                .EnterBossEnrage(this);
-        }
-
-        /*
-         * =========================
-         * LOGIC
-         * =========================
-         */
 
         public bool ShouldDetectPlayer()
         {
             var mode =
                 GameModeService.CurrentMode;
 
-            if (mode == App.Services.GameMode.Normal)
+            if (mode == GameMode.Normal)
             {
                 return CombatEvaluator.IsTargetDetected(
                     Self,
@@ -150,7 +96,7 @@ namespace Presentation.AI
                     DetectionRadius);
             }
 
-            if (mode == App.Services.GameMode.Peaceful)
+            if (mode == GameMode.Peaceful)
             {
                 return IsActivated;
             }
@@ -174,144 +120,10 @@ namespace Presentation.AI
                 DetectionRadius);
         }
 
-        /*
-         * =========================
-         * STATE TICKS
-         * =========================
-         */
-
-        public void TickIdle(
-            ref float wanderTimer,
-            float wanderDelay)
-        {
-            if (ShouldDetectPlayer())
-            {
-                EnterChase();
-                return;
-            }
-
-            wanderTimer -= Time.deltaTime;
-
-            if (wanderTimer <= 0f)
-            {
-                WanderService.TryWander(
-                    Agent,
-                    Self,
-                    6f);
-
-                wanderTimer = wanderDelay;
-            }
-        }
-
-        public void TickChase()
-        {
-            if (ShouldReturnToIdle())
-            {
-                EnterIdle();
-                return;
-            }
-
-            if (ShouldAttack())
-            {
-                if (Random.value > 0.5f)
-                {
-                    EnterHeavyAttack();
-                }
-                else
-                {
-                    EnterAttack();
-                }
-
-                return;
-            }
-
-            MovementService.RotateTo(
-                Self,
-                Player.position);
-
-            MovementService.MoveTo(
-                Agent,
-                Player.position);
-        }
-
-        public void TickAttack(
-            ref float timer,
-            float cooldown)
-        {
-            if (!ShouldAttack())
-            {
-                EnterChase();
-                return;
-            }
-
-            timer -=
-                Time.deltaTime *
-                AttackSpeedMultiplier;
-
-            if (timer <= 0f)
-            {
-                EnemyView.Attack(
-                    Player,
-                    1f);
-
-                timer = cooldown;
-            }
-        }
-
-        public void TickHeavyAttack(
-            ref float timer)
-        {
-            timer -=
-                Time.deltaTime *
-                AttackSpeedMultiplier;
-
-            if (timer <= 0f)
-            {
-                EnemyView.Attack(
-                    Player,
-                    2.5f,
-                    true);
-
-                EnterRecover();
-            }
-        }
-
-        public void TickRecover(
-            ref float timer)
-        {
-            timer -= Time.deltaTime;
-
-            if (timer <= 0f)
-            {
-                EnterChase();
-            }
-        }
-
-        public void TickStun(
-            ref float timer)
-        {
-            timer -= Time.deltaTime;
-
-            if (timer <= 0f)
-            {
-                EnterChase();
-            }
-        }
-
-        public void TickEnrage(
-            ref float timer)
-        {
-            timer -= Time.deltaTime;
-
-            if (timer <= 0f)
-            {
-                EnterChase();
-            }
-        }
-
         public void EnterStunState(float duration)
         {
-            EnterStun(duration);
+            ((BossStateMachine)_stateMachine)
+                .EnterStun(duration);
         }
     }
 }

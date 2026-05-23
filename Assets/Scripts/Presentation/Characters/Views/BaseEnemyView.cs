@@ -205,8 +205,7 @@ namespace Presentation.Scene
             {
                 baseBehaviour.enabled = true;
 
-                baseBehaviour.StateMachine.EnterDefaultState(
-                    baseBehaviour);
+                baseBehaviour.StateMachine.EnterDefaultState();
             }
 
             if (animator != null)

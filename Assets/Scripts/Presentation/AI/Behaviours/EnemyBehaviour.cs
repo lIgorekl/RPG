@@ -13,14 +13,12 @@ namespace Presentation.AI
         protected override void Start()
         {
             _stateMachine =
-                new MeleeEnemyStateMachine();
+                new MeleeEnemyStateMachine(this);
 
             base.Start();
 
-            var meleeStateMachine =
-                (MeleeEnemyStateMachine)_stateMachine;
-
-            meleeStateMachine.EnterIdle(this);
+            ((MeleeEnemyStateMachine)_stateMachine)
+                .EnterIdle();
         }
 
         // Радиус, на котором враг начинает реагировать на игрока
@@ -104,7 +102,7 @@ namespace Presentation.AI
         public override void EnterStunState(float duration)
         {
             ((MeleeEnemyStateMachine)_stateMachine)
-                .EnterStun(this, duration);
+                .EnterStun(duration);
         }
     }
 }

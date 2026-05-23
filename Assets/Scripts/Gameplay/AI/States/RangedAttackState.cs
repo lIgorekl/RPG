@@ -4,17 +4,14 @@ namespace Presentation.AI
 {
     public class RangedAttackState : IEnemyState
     {
-        private readonly RangedEnemyBehaviour _behaviour;
         private readonly RangedEnemyStateMachine _stateMachine;
 
         private float _cooldown = 2f;
         private float _timer;
 
         public RangedAttackState(
-            RangedEnemyBehaviour behaviour,
             RangedEnemyStateMachine stateMachine)
         {
-            _behaviour = behaviour;
             _stateMachine = stateMachine;
         }
 
@@ -22,14 +19,17 @@ namespace Presentation.AI
         {
             _timer = 0f;
 
-            _behaviour.EnterRangedAttack();
+            _stateMachine.RangedBehaviour.EnterRangedAttack();
         }
 
         public void Update()
         {
-            if (_behaviour.ShouldStopRangedAttack())
+            var behaviour =
+                _stateMachine.RangedBehaviour;
+
+            if (behaviour.ShouldStopRangedAttack())
             {
-                _stateMachine.EnterMaintainDistance(_behaviour);
+                _stateMachine.EnterMaintainDistance();
                 return;
             }
 
@@ -37,7 +37,7 @@ namespace Presentation.AI
 
             if (_timer <= 0f)
             {
-                _behaviour.UpdateRangedAttack();
+                behaviour.UpdateRangedAttack();
 
                 _timer = _cooldown;
             }
@@ -45,7 +45,7 @@ namespace Presentation.AI
 
         public void Exit()
         {
-            _behaviour.ExitRangedAttack();
+            _stateMachine.RangedBehaviour.ExitRangedAttack();
         }
     }
 }

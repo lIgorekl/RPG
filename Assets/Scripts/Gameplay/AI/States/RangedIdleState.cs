@@ -1,20 +1,15 @@
-using UnityEngine;
-
 namespace Presentation.AI
 {
     public class RangedIdleState : IEnemyState
     {
-        private readonly RangedEnemyBehaviour _behaviour;
         private readonly RangedEnemyStateMachine _stateMachine;
 
         private float _wanderTimer;
         private float _wanderDelay = 2f;
 
         public RangedIdleState(
-            RangedEnemyBehaviour behaviour,
             RangedEnemyStateMachine stateMachine)
         {
-            _behaviour = behaviour;
             _stateMachine = stateMachine;
         }
 
@@ -25,25 +20,28 @@ namespace Presentation.AI
 
         public void Update()
         {
-            if (_behaviour.ShouldMaintainDistance())
+            var behaviour =
+                _stateMachine.RangedBehaviour;
+
+            if (behaviour.ShouldMaintainDistance())
             {
-                _stateMachine.EnterMaintainDistance(_behaviour);
+                _stateMachine.EnterMaintainDistance();
                 return;
             }
 
-            if (_behaviour.ShouldFlee())
+            if (behaviour.ShouldFlee())
             {
-                if (_behaviour.CombatEvaluator.IsTargetDetected(
-                    _behaviour.Self,
-                    _behaviour.Player,
-                    _behaviour.DetectionRadius))
+                if (behaviour.CombatEvaluator.IsTargetDetected(
+                    behaviour.Self,
+                    behaviour.Player,
+                    behaviour.DetectionRadius))
                 {
-                    _stateMachine.EnterFlee(_behaviour);
+                    _stateMachine.EnterFlee();
                     return;
                 }
             }
 
-            _behaviour.UpdateIdle(
+            behaviour.UpdateIdle(
                 ref _wanderTimer,
                 _wanderDelay);
         }

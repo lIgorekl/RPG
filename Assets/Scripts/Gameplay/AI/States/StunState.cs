@@ -1,33 +1,42 @@
+using UnityEngine;
+
 namespace Presentation.AI
 {
     public class StunState : IEnemyState
     {
-        private readonly BaseCombatEnemyBehaviour _behaviour;
+        private readonly EnemyStateMachineBase _stateMachine;
+
+        private BaseCombatEnemyBehaviour Behaviour =>
+            (BaseCombatEnemyBehaviour)_stateMachine.Behaviour;
 
         private float _timer;
 
         public StunState(
-            BaseCombatEnemyBehaviour behaviour,
+            EnemyStateMachineBase stateMachine,
             float duration)
         {
-            _behaviour = behaviour;
+            _stateMachine = stateMachine;
             _timer = duration;
         }
 
         public void Enter()
         {
-            _behaviour.EnterStun();
+            Behaviour.EnterStun();
         }
 
         public void Update()
         {
-            _behaviour.TickStun(
-                ref _timer);
+            _timer -= Time.deltaTime;
+
+            if (_timer <= 0f)
+            {
+                _stateMachine.EnterDefaultState();
+            }
         }
 
         public void Exit()
         {
-            _behaviour.ExitStun();
+            Behaviour.ExitStun();
         }
     }
 }

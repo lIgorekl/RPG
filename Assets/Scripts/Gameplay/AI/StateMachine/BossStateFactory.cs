@@ -2,49 +2,49 @@ namespace Presentation.AI
 {
     public class BossStateFactory
     {
-        public BossIdleState CreateIdle(
-            BossBehaviour behaviour)
+        private readonly BossStateMachine _stateMachine;
+
+        public BossStateFactory(
+            BossStateMachine stateMachine)
         {
-            return new BossIdleState(behaviour);
+            _stateMachine = stateMachine;
         }
 
-        public BossChaseState CreateChase(
-            BossBehaviour behaviour)
+        public BossIdleState CreateIdle()
         {
-            return new BossChaseState(behaviour);
+            return new BossIdleState(_stateMachine);
         }
 
-        public BossAttackState CreateAttack(
-            BossBehaviour behaviour)
+        public BossChaseState CreateChase()
         {
-            return new BossAttackState(behaviour);
+            return new BossChaseState(_stateMachine);
         }
 
-        public BossHeavyAttackState CreateHeavyAttack(
-            BossBehaviour behaviour)
+        public BossAttackState CreateAttack()
         {
-            return new BossHeavyAttackState(behaviour);
+            return new BossAttackState(_stateMachine);
         }
 
-        public BossRecoverState CreateRecover(
-            BossBehaviour behaviour)
+        public BossHeavyAttackState CreateHeavyAttack()
         {
-            return new BossRecoverState(behaviour);
+            return new BossHeavyAttackState(_stateMachine);
         }
 
-        public BossStunState CreateStun(
-            BossBehaviour behaviour,
-            float duration)
+        public BossRecoverState CreateRecover()
+        {
+            return new BossRecoverState(_stateMachine);
+        }
+
+        public BossStunState CreateStun(float duration)
         {
             return new BossStunState(
-                behaviour,
+                _stateMachine,
                 duration);
         }
 
-        public BossEnrageState CreateEnrage(
-            BossBehaviour behaviour)
+        public BossEnrageState CreateEnrage()
         {
-            return new BossEnrageState(behaviour);
+            return new BossEnrageState(_stateMachine);
         }
     }
 }

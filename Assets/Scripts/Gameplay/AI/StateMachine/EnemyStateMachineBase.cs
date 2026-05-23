@@ -2,9 +2,17 @@ namespace Presentation.AI
 {
     public abstract class EnemyStateMachineBase
     {
+        public BaseEnemyBehaviour Behaviour { get; }
+
         protected IEnemyState _currentState;
 
         public IEnemyState CurrentState => _currentState;
+
+        protected EnemyStateMachineBase(
+            BaseEnemyBehaviour behaviour)
+        {
+            Behaviour = behaviour;
+        }
 
         protected void ChangeState(IEnemyState newState)
         {
@@ -20,7 +28,6 @@ namespace Presentation.AI
             _currentState?.Update();
         }
 
-        public abstract void EnterDefaultState(
-            BaseEnemyBehaviour behaviour);
+        public abstract void EnterDefaultState();
     }
 }

@@ -2,14 +2,11 @@ namespace Presentation.AI
 {
     public class MaintainDistanceState : IEnemyState
     {
-        private readonly RangedEnemyBehaviour _behaviour;
         private readonly RangedEnemyStateMachine _stateMachine;
 
         public MaintainDistanceState(
-            RangedEnemyBehaviour behaviour,
             RangedEnemyStateMachine stateMachine)
         {
-            _behaviour = behaviour;
             _stateMachine = stateMachine;
         }
 
@@ -17,25 +14,28 @@ namespace Presentation.AI
 
         public void Update()
         {
-            if (_behaviour.ShouldFlee())
+            var behaviour =
+                _stateMachine.RangedBehaviour;
+
+            if (behaviour.ShouldFlee())
             {
-                _stateMachine.EnterFlee(_behaviour);
+                _stateMachine.EnterFlee();
                 return;
             }
 
-            if (_behaviour.ShouldReturnToRangedIdle())
+            if (behaviour.ShouldReturnToRangedIdle())
             {
-                _stateMachine.EnterRangedIdle(_behaviour);
+                _stateMachine.EnterRangedIdle();
                 return;
             }
 
-            if (_behaviour.ShouldStartRangedAttack())
+            if (behaviour.ShouldStartRangedAttack())
             {
-                _stateMachine.EnterRangedAttack(_behaviour);
+                _stateMachine.EnterRangedAttack();
                 return;
             }
 
-            _behaviour.UpdateMaintainDistance();
+            behaviour.UpdateMaintainDistance();
         }
 
         public void Exit() { }

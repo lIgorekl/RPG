@@ -2,14 +2,11 @@ namespace Presentation.AI
 {
     public class ChaseState : IEnemyState
     {
-        private readonly EnemyBehaviour _behaviour;
         private readonly MeleeEnemyStateMachine _stateMachine;
 
         public ChaseState(
-            EnemyBehaviour behaviour,
             MeleeEnemyStateMachine stateMachine)
         {
-            _behaviour = behaviour;
             _stateMachine = stateMachine;
         }
 
@@ -17,25 +14,28 @@ namespace Presentation.AI
 
         public void Update()
         {
-            if (_behaviour.ShouldFlee())
+            var behaviour =
+                _stateMachine.EnemyBehaviour;
+
+            if (behaviour.ShouldFlee())
             {
-                _stateMachine.EnterFlee(_behaviour);
+                _stateMachine.EnterFlee();
                 return;
             }
 
-            if (_behaviour.ShouldReturnToIdle())
+            if (behaviour.ShouldReturnToIdle())
             {
-                _stateMachine.EnterIdle(_behaviour);
+                _stateMachine.EnterIdle();
                 return;
             }
 
-            if (_behaviour.ShouldAttackPlayer())
+            if (behaviour.ShouldAttackPlayer())
             {
-                _stateMachine.EnterAttack(_behaviour);
+                _stateMachine.EnterAttack();
                 return;
             }
 
-            _behaviour.UpdateChase();
+            behaviour.UpdateChase();
         }
 
         public void Exit() { }

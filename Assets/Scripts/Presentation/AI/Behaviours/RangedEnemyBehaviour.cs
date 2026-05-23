@@ -27,7 +27,7 @@ namespace Presentation.AI
         protected override void Start()
         {
             _stateMachine =
-                new RangedEnemyStateMachine();
+                new RangedEnemyStateMachine(this);
 
             base.Start();
 
@@ -35,7 +35,7 @@ namespace Presentation.AI
                 _player.GetComponent<Presentation.Player.PlayerController>();
 
             ((RangedEnemyStateMachine)_stateMachine)
-                .EnterRangedIdle(this);
+                .EnterRangedIdle();
         }
 
         // Создание и запуск магического снаряда
@@ -144,7 +144,7 @@ namespace Presentation.AI
         public override void EnterStunState(float duration)
         {
             ((RangedEnemyStateMachine)_stateMachine)
-                .EnterStun(this, duration);
+                .EnterStun(duration);
         }
     }
 }
