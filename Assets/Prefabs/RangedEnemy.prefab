@@ -215,6 +215,7 @@ MonoBehaviour:
   moveSpeed: 3
   projectilePrefab: {fileID: 1298582854846846684, guid: 25d6c0ae962805649bf86554df6f2700, type: 3}
   projectileSpawnPoint: {fileID: 4363092188648409930}
+  weaponLoadout: {fileID: 11400000, guid: 920600c36fc577c44a057817bafff54e, type: 2}
 --- !u!195 &8935883451460102912
 NavMeshAgent:
   m_ObjectHideFlags: 0

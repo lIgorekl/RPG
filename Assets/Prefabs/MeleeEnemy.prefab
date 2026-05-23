@@ -2799,6 +2799,7 @@ MonoBehaviour:
   detectionRadius: 10
   attackRadius: 2
   moveSpeed: 3
+  weaponLoadout: {fileID: 11400000, guid: 8e98a47c9d47a424cb8faf78b2ea8db0, type: 2}
 --- !u!195 &4612991446226527443
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -61,7 +61,8 @@ namespace App.Services.Spawn
                     spawnPoint.Position,
                     spawnPoint.Rotation,
                     enemyId,
-                    context.Player);
+                    context.Player,
+                    context.RandomSource);
 
                 if (enemy != null)
                     spawnedEnemies.Add(enemy);

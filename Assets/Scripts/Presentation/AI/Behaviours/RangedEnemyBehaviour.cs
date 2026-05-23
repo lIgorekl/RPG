@@ -1,11 +1,15 @@
 using UnityEngine;
 using Presentation.Combat;
+using Gameplay.Combat.Weapons;
+using Core.Combat;
 
 namespace Presentation.AI
 {
     // Поведение врага дальнего боя.
     // Враг держит дистанцию от игрока и атакует магическими снарядами.
-    public class RangedEnemyBehaviour : BaseCombatEnemyBehaviour
+    public class RangedEnemyBehaviour : BaseCombatEnemyBehaviour,
+        IEnemyWeaponHolder,
+        IEnemyWeaponAssignable
     {
         [SerializeField] private float detectionRadius = 12f;
 
@@ -16,8 +20,28 @@ namespace Presentation.AI
 
         [SerializeField] private ProjectileView projectilePrefab;
         [SerializeField] private Transform projectileSpawnPoint;
+        [SerializeField] private EnemyWeaponLoadout weaponLoadout;
 
         private Presentation.Player.PlayerController _playerController;
+        private EnemyWeapon _currentWeapon;
+
+        public EnemyWeapon CurrentWeapon => _currentWeapon;
+        public float AttackCooldown =>
+            _currentWeapon?.AttackCooldown ?? 2f;
+
+        public void SetWeapon(EnemyWeaponConfig config)
+        {
+            _currentWeapon =
+                config != null ? new EnemyWeapon(config) : null;
+        }
+
+        public void AssignRandomWeapon(System.Random random)
+        {
+            if (weaponLoadout == null)
+                return;
+
+            SetWeapon(weaponLoadout.PickRandom(random));
+        }
 
         // Используется состояниями
         public ProjectileView ProjectilePrefab => projectilePrefab;
@@ -26,6 +50,9 @@ namespace Presentation.AI
 
         protected override void Start()
         {
+            if (_currentWeapon == null)
+                AssignRandomWeapon(new System.Random());
+
             _stateMachine =
                 new RangedEnemyStateMachine(this);
 
@@ -41,8 +68,12 @@ namespace Presentation.AI
         // Создание и запуск магического снаряда
         public void PerformAttack()
         {
+            var prefab = ResolveProjectilePrefab();
+            if (prefab == null)
+                return;
+
             var projectile = Instantiate(
-                projectilePrefab,
+                prefab,
                 projectileSpawnPoint.position,
                 Quaternion.identity);
 
@@ -55,9 +86,26 @@ namespace Presentation.AI
             projectile.transform.forward = direction;
 
             var entity = EnemyView.GetEntity();
-            var damage = entity.GetMagicalDamage();
+            var baseDamage = entity.GetMagicalDamage();
+            float multiplier =
+                _currentWeapon?.DamageMultiplier ?? 1f;
+
+            var damage = new Damage(
+                Mathf.RoundToInt(baseDamage.Value * multiplier),
+                baseDamage.Type);
 
             projectile.Initialize(damage, transform);
+        }
+
+        private ProjectileView ResolveProjectilePrefab()
+        {
+            if (_currentWeapon?.ProjectilePrefab != null)
+            {
+                return _currentWeapon.ProjectilePrefab
+                    .GetComponent<ProjectileView>();
+            }
+
+            return projectilePrefab;
         }
 
         // Параметры поведения

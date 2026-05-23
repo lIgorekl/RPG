@@ -1,3 +1,4 @@
+using Gameplay.Combat.Weapons;
 using UnityEngine;
 
 namespace Presentation.AI
@@ -6,7 +7,7 @@ namespace Presentation.AI
     {
         private readonly RangedEnemyStateMachine _stateMachine;
 
-        private float _cooldown = 2f;
+        private float _cooldown;
         private float _timer;
 
         public RangedAttackState(
@@ -18,6 +19,8 @@ namespace Presentation.AI
         public void Enter()
         {
             _timer = 0f;
+            _cooldown = ResolveAttackCooldown(
+                _stateMachine.RangedBehaviour);
 
             _stateMachine.RangedBehaviour.EnterRangedAttack();
         }
@@ -46,6 +49,15 @@ namespace Presentation.AI
         public void Exit()
         {
             _stateMachine.RangedBehaviour.ExitRangedAttack();
+        }
+
+        private static float ResolveAttackCooldown(
+            RangedEnemyBehaviour behaviour)
+        {
+            if (behaviour is IEnemyWeaponHolder holder)
+                return holder.AttackCooldown;
+
+            return 2f;
         }
     }
 }

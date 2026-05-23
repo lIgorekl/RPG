@@ -1,3 +1,4 @@
+using Gameplay.Combat.Weapons;
 using Presentation.AI;
 using Presentation.Scene;
 using UnityEngine;
@@ -11,12 +12,16 @@ namespace App.Services.Spawn
             Vector3 position,
             Quaternion rotation,
             string enemyId,
-            Transform player)
+            Transform player,
+            System.Random random)
         {
             var instance = Object.Instantiate(
                 definition.Prefab,
                 position,
                 rotation);
+
+            if (random != null)
+                EnemyWeaponAssigner.AssignRandomWeapon(instance, random);
 
             var view = instance.GetComponent<BaseEnemyView>();
             if (view == null)

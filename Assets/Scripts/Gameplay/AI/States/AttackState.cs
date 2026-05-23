@@ -1,3 +1,4 @@
+using Gameplay.Combat.Weapons;
 using UnityEngine;
 
 namespace Presentation.AI
@@ -6,7 +7,7 @@ namespace Presentation.AI
     {
         private readonly MeleeEnemyStateMachine _stateMachine;
 
-        private float _cooldown = 1f;
+        private float _cooldown;
         private float _timer;
 
         public AttackState(
@@ -18,6 +19,8 @@ namespace Presentation.AI
         public void Enter()
         {
             _timer = 0f;
+            _cooldown = ResolveAttackCooldown(
+                _stateMachine.EnemyBehaviour);
 
             _stateMachine.EnemyBehaviour.EnterAttack();
         }
@@ -46,6 +49,15 @@ namespace Presentation.AI
         public void Exit()
         {
             _stateMachine.EnemyBehaviour.ExitAttack();
+        }
+
+        private static float ResolveAttackCooldown(
+            EnemyBehaviour behaviour)
+        {
+            if (behaviour is IEnemyWeaponHolder holder)
+                return holder.AttackCooldown;
+
+            return 1f;
         }
     }
 }

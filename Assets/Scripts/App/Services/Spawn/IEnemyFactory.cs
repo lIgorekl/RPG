@@ -10,6 +10,7 @@ namespace App.Services.Spawn
             Vector3 position,
             Quaternion rotation,
             string enemyId,
-            Transform player);
+            Transform player,
+            System.Random random);
     }
 }
