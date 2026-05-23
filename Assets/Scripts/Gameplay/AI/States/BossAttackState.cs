@@ -1,3 +1,4 @@
+using Gameplay.Combat.Weapons;
 using UnityEngine;
 
 namespace Presentation.AI
@@ -6,7 +7,7 @@ namespace Presentation.AI
     {
         private readonly BossStateMachine _stateMachine;
 
-        private float _cooldown = 1.5f;
+        private float _cooldown;
         private float _timer;
 
         public BossAttackState(
@@ -17,10 +18,11 @@ namespace Presentation.AI
 
         public void Enter()
         {
-            _timer = _cooldown;
-
             var behaviour =
                 _stateMachine.BossBehaviour;
+
+            _cooldown = ResolveAttackCooldown(behaviour);
+            _timer = _cooldown;
 
             behaviour.MovementService.Stop(
                 behaviour.Agent);
@@ -43,10 +45,7 @@ namespace Presentation.AI
 
             if (_timer <= 0f)
             {
-                behaviour.EnemyView.Attack(
-                    behaviour.Player,
-                    1f);
-
+                PerformAttack(behaviour);
                 _timer = _cooldown;
             }
         }
@@ -58,6 +57,26 @@ namespace Presentation.AI
 
             behaviour.MovementService.Resume(
                 behaviour.Agent);
+        }
+
+        private static void PerformAttack(BossBehaviour behaviour)
+        {
+            bool useHeavyAnimation =
+                behaviour.CurrentWeapon?.UseHeavyAttackAnimation ?? false;
+
+            behaviour.EnemyView.Attack(
+                behaviour.Player,
+                behaviour.AttackDamageMultiplier,
+                useHeavyAnimation);
+        }
+
+        private static float ResolveAttackCooldown(
+            BossBehaviour behaviour)
+        {
+            if (behaviour is IEnemyWeaponHolder holder)
+                return holder.AttackCooldown;
+
+            return 1.5f;
         }
     }
 }

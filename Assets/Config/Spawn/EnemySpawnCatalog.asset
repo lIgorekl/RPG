@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: EnemySpawnCatalog
   m_EditorClassIdentifier: 
   definitions:
+  - {fileID: 11400000, guid: 5b0a042c9dbc8694dbb2d4a9fd693f44, type: 2}
   - {fileID: 11400000, guid: 6fbdb671a276aff49a094110363593e9, type: 2}
   - {fileID: 11400000, guid: 8e7a46f6aee44974eb1702543808d422, type: 2}
-  - {fileID: 11400000, guid: 5b0a042c9dbc8694dbb2d4a9fd693f44, type: 2}

@@ -28,8 +28,19 @@ namespace App.Services.Spawn
                     (shuffled[swapIndex], shuffled[i]);
             }
 
-            int takeCount = Math.Min(count, shuffled.Count);
-            return shuffled.GetRange(0, takeCount);
+            if (count <= shuffled.Count)
+                return shuffled.GetRange(0, count);
+
+            var result = new List<SpawnPoint>(count);
+            result.AddRange(shuffled);
+
+            for (int i = shuffled.Count; i < count; i++)
+            {
+                int index = random.Next(0, shuffled.Count);
+                result.Add(shuffled[index]);
+            }
+
+            return result;
         }
     }
 }

@@ -9,12 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc4b65e99b7117b468d5424df84c45d8, type: 3}
-  m_Name: MeleeSpawnDef
+  m_Script: {fileID: 11500000, guid: aa4f3193da80e604ea0aed84e523693d, type: 3}
+  m_Name: BossWeaponLoadout
   m_EditorClassIdentifier: 
-  prefab: {fileID: 7806538930925831115, guid: 79e8b6a88950f374a8176599b59ebaf8, type: 3}
-  combatRole: 0
-  spawnWeight: 5
-  allowedGameModes: 0000000001000000
-  isBoss: 0
-  idPrefix: melee
+  weapons:
+  - {fileID: 11400000, guid: 08879934fb3444b4580c2180f7a5ac09, type: 2}
+  - {fileID: 11400000, guid: cb9ae119ddf1cdb4a819a9b74a8cd0d7, type: 2}

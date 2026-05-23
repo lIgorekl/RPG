@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using App.Services;
+using Presentation.AI;
 using Presentation.Scene;
 using UnityEngine;
 
@@ -28,32 +29,124 @@ namespace App.Services.Spawn
             if (context == null)
                 return Array.Empty<BaseEnemyView>();
 
-            var definitions = FilterDefinitions(context);
-            if (definitions.Count == 0)
+            var allowedDefinitions = FilterDefinitions(context);
+            if (allowedDefinitions.Count == 0)
                 return Array.Empty<BaseEnemyView>();
 
             if (context.SpawnPoints == null || context.SpawnPoints.Count == 0)
                 return Array.Empty<BaseEnemyView>();
 
-            int spawnCount = context.RandomSource.Next(
-                context.Settings.MinSpawnCount,
-                context.Settings.MaxSpawnCount + 1);
+            var meleeDefinition = FindDefinition(
+                allowedDefinitions,
+                EnemySpawnCombatRole.Melee,
+                isBoss: false);
+
+            var rangedDefinition = FindDefinition(
+                allowedDefinitions,
+                EnemySpawnCombatRole.Ranged,
+                isBoss: false);
+
+            var bossDefinition = FindBossDefinition(allowedDefinitions);
+
+            var regularDefinitions = FilterRegularDefinitions(
+                allowedDefinitions);
+
+            int minCount = context.Settings.MinSpawnCount;
+            int maxCount = context.Settings.MaxSpawnCount;
+
+            int requiredTypes = 0;
+            if (meleeDefinition != null)
+                requiredTypes++;
+            if (rangedDefinition != null)
+                requiredTypes++;
+
+            int targetCount = context.RandomSource.Next(minCount, maxCount + 1);
+            targetCount = Mathf.Max(targetCount, requiredTypes);
+            targetCount = Mathf.Clamp(targetCount, minCount, maxCount);
+
+            var spawnPlan = BuildSpawnPlan(
+                targetCount,
+                meleeDefinition,
+                rangedDefinition,
+                regularDefinitions,
+                context.RandomSource);
+
+            if (ShouldSpawnBoss(context, bossDefinition))
+                spawnPlan.Add(bossDefinition);
+
+            if (spawnPlan.Count == 0)
+                return Array.Empty<BaseEnemyView>();
 
             var selectedPoints = _spawnPointSelector.Select(
                 context.SpawnPoints,
-                spawnCount,
+                spawnPlan.Count,
                 context.RandomSource);
 
-            var spawnedEnemies = new List<BaseEnemyView>(selectedPoints.Count);
+            return SpawnFromPlan(
+                spawnPlan,
+                selectedPoints,
+                context);
+        }
 
-            foreach (var spawnPoint in selectedPoints)
+        private List<EnemySpawnDefinition> BuildSpawnPlan(
+            int targetCount,
+            EnemySpawnDefinition meleeDefinition,
+            EnemySpawnDefinition rangedDefinition,
+            List<EnemySpawnDefinition> regularDefinitions,
+            System.Random random)
+        {
+            var plan = new List<EnemySpawnDefinition>(targetCount);
+
+            if (meleeDefinition != null)
+                plan.Add(meleeDefinition);
+
+            if (rangedDefinition != null &&
+                !ContainsDefinition(plan, rangedDefinition))
             {
+                plan.Add(rangedDefinition);
+            }
+
+            while (plan.Count < targetCount)
+            {
+                if (regularDefinitions.Count == 0)
+                    break;
+
                 var definition = _definitionSelector.Select(
-                    definitions,
-                    context.RandomSource);
+                    regularDefinitions,
+                    random);
 
                 if (definition == null)
-                    continue;
+                    break;
+
+                plan.Add(definition);
+            }
+
+            return plan;
+        }
+
+        private static bool ShouldSpawnBoss(
+            EnemySpawnContext context,
+            EnemySpawnDefinition bossDefinition)
+        {
+            if (bossDefinition == null)
+                return false;
+
+            return context.RandomSource.NextDouble() <=
+                context.Settings.BossSpawnChance;
+        }
+
+        private List<BaseEnemyView> SpawnFromPlan(
+            List<EnemySpawnDefinition> spawnPlan,
+            IReadOnlyList<SpawnPoint> spawnPoints,
+            EnemySpawnContext context)
+        {
+            var spawnedEnemies = new List<BaseEnemyView>(spawnPlan.Count);
+            int pointCount = Mathf.Min(spawnPlan.Count, spawnPoints.Count);
+
+            for (int i = 0; i < pointCount; i++)
+            {
+                var definition = spawnPlan[i];
+                var spawnPoint = spawnPoints[i];
 
                 string enemyId = BuildEnemyId(definition);
                 var enemy = _enemyFactory.Create(
@@ -69,6 +162,80 @@ namespace App.Services.Spawn
             }
 
             return spawnedEnemies;
+        }
+
+        private static List<EnemySpawnDefinition> FilterRegularDefinitions(
+            List<EnemySpawnDefinition> definitions)
+        {
+            var result = new List<EnemySpawnDefinition>();
+
+            foreach (var definition in definitions)
+            {
+                if (definition == null || definition.IsBoss)
+                    continue;
+
+                result.Add(definition);
+            }
+
+            return result;
+        }
+
+        private static EnemySpawnDefinition FindDefinition(
+            List<EnemySpawnDefinition> definitions,
+            EnemySpawnCombatRole role,
+            bool isBoss)
+        {
+            foreach (var definition in definitions)
+            {
+                if (definition == null)
+                    continue;
+
+                if (definition.IsBoss != isBoss)
+                    continue;
+
+                if (ResolveCombatRole(definition) == role)
+                    return definition;
+            }
+
+            return null;
+        }
+
+        private static EnemySpawnCombatRole ResolveCombatRole(
+            EnemySpawnDefinition definition)
+        {
+            if (definition.IsBoss)
+                return definition.CombatRole;
+
+            var prefab = definition.Prefab;
+            if (prefab != null)
+            {
+                if (prefab.GetComponent<RangedEnemyBehaviour>() != null)
+                    return EnemySpawnCombatRole.Ranged;
+
+                if (prefab.GetComponent<EnemyBehaviour>() != null)
+                    return EnemySpawnCombatRole.Melee;
+            }
+
+            return definition.CombatRole;
+        }
+
+        private static EnemySpawnDefinition FindBossDefinition(
+            List<EnemySpawnDefinition> definitions)
+        {
+            foreach (var definition in definitions)
+            {
+                if (definition != null && definition.IsBoss)
+                    return definition;
+            }
+
+            return null;
+        }
+
+        private static bool ContainsDefinition(
+            List<EnemySpawnDefinition> plan,
+            EnemySpawnDefinition definition)
+        {
+            return plan.Contains(definition);
         }
 
         private List<EnemySpawnDefinition> FilterDefinitions(

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: RangedSpawnDef
   m_EditorClassIdentifier: 
   prefab: {fileID: 245266529897548841, guid: 028781ebf3badc0419591f282cd345d2, type: 3}
+  combatRole: 1
   spawnWeight: 3
   allowedGameModes: 0000000001000000
   isBoss: 0

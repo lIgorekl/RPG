@@ -1,15 +1,27 @@
 using UnityEngine;
 using App.Services;
+using Gameplay.Combat.Boss;
+using Gameplay.Combat.Weapons;
+using Presentation.Combat;
 
 namespace Presentation.AI
 {
-    public class BossBehaviour : BaseEnemyBehaviour
+    public class BossBehaviour : BaseEnemyBehaviour,
+        IEnemyWeaponHolder,
+        IBossVariantAssignable
     {
+        private const float BaseHeavySlamDamageMultiplier = 2.5f;
+
         [SerializeField] private float detectionRadius = 15f;
         [SerializeField] private float attackRadius = 3f;
+        [SerializeField] private BossWeaponLoadout weaponLoadout;
+        [SerializeField] private BossElementLoadout elementLoadout;
+        [SerializeField] private BossElementVisualController elementVisuals;
 
         private bool _isActivated;
         private bool _isEnraged;
+        private bool _variantsAssigned;
+        private EnemyWeapon _currentWeapon;
 
         public float AttackRadius => attackRadius;
 
@@ -22,8 +34,48 @@ namespace Presentation.AI
 
         public float AttackSpeedMultiplier { get; private set; } = 1f;
 
+        public EnemyWeapon CurrentWeapon => _currentWeapon;
+
+        public float AttackCooldown =>
+            _currentWeapon?.AttackCooldown ?? 1.5f;
+
+        public float AttackDamageMultiplier =>
+            _currentWeapon?.DamageMultiplier ?? 1f;
+
+        public float HeavyAttackDamageMultiplier =>
+            BaseHeavySlamDamageMultiplier * AttackDamageMultiplier;
+
+        public void SetWeapon(EnemyWeaponConfig config)
+        {
+            _currentWeapon =
+                config != null ? new EnemyWeapon(config) : null;
+        }
+
+        public void SetElement(BossElementConfig config)
+        {
+            if (elementVisuals == null)
+                elementVisuals =
+                    GetComponent<BossElementVisualController>();
+
+            elementVisuals?.ApplyElement(config);
+        }
+
+        public void AssignRandomVariants(System.Random random)
+        {
+            if (weaponLoadout != null)
+                SetWeapon(weaponLoadout.PickRandom(random));
+
+            if (elementLoadout != null)
+                SetElement(elementLoadout.PickRandom(random));
+
+            _variantsAssigned = true;
+        }
+
         protected override void Start()
         {
+            if (!_variantsAssigned)
+                AssignRandomVariants(new System.Random());
+
             _stateMachine =
                 new BossStateMachine(this);
 

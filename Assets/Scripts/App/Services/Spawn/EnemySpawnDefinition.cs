@@ -4,12 +4,20 @@ using App.Services;
 
 namespace App.Services.Spawn
 {
+    public enum EnemySpawnCombatRole
+    {
+        Melee,
+        Ranged
+    }
+
     [CreateAssetMenu(
         fileName = "EnemySpawnDefinition",
         menuName = "RPG/Spawn/Enemy Spawn Definition")]
     public class EnemySpawnDefinition : ScriptableObject
     {
         [SerializeField] private GameObject prefab;
+        [SerializeField] private EnemySpawnCombatRole combatRole =
+            EnemySpawnCombatRole.Melee;
         [SerializeField] private int spawnWeight = 1;
         [SerializeField] private GameMode[] allowedGameModes =
         {
@@ -20,6 +28,7 @@ namespace App.Services.Spawn
         [SerializeField] private string idPrefix = "enemy";
 
         public GameObject Prefab => prefab;
+        public EnemySpawnCombatRole CombatRole => combatRole;
         public int SpawnWeight => Mathf.Max(1, spawnWeight);
         public bool IsBoss => isBoss;
         public string IdPrefix => idPrefix;

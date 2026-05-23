@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: BossSpawnDef
   m_EditorClassIdentifier: 
   prefab: {fileID: 7806538930925831115, guid: e57926685a896064fa5a9961a23c67e4, type: 3}
-  spawnWeight: 1
+  combatRole: 0
+  spawnWeight: 7
   allowedGameModes: 0000000001000000
   isBoss: 1
   idPrefix: boss

@@ -38,7 +38,7 @@ namespace Presentation.AI
             {
                 behaviour.EnemyView.Attack(
                     behaviour.Player,
-                    2.5f,
+                    behaviour.HeavyAttackDamageMultiplier,
                     true);
 
                 _stateMachine.EnterRecover();

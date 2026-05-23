@@ -9,12 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc4b65e99b7117b468d5424df84c45d8, type: 3}
-  m_Name: MeleeSpawnDef
+  m_Script: {fileID: 11500000, guid: 0412d6b9dfbb8fb42a50aed7383e6efc, type: 3}
+  m_Name: BossLightWeapon
   m_EditorClassIdentifier: 
-  prefab: {fileID: 7806538930925831115, guid: 79e8b6a88950f374a8176599b59ebaf8, type: 3}
-  combatRole: 0
-  spawnWeight: 5
-  allowedGameModes: 0000000001000000
-  isBoss: 0
-  idPrefix: melee
+  damageMultiplier: 1
+  attackCooldown: 1.5
+  useHeavyAttackAnimation: 0
+  projectilePrefab: {fileID: 0}

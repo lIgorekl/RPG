@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minSpawnCount: 5
   maxSpawnCount: 7
+  bossSpawnChance: 1
