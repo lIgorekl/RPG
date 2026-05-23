@@ -30,8 +30,18 @@ namespace App
 
             _instance = this;
             DontDestroyOnLoad(gameObject);
+            PersistAudioSources();
 
             Initialize();
+        }
+
+        private void PersistAudioSources()
+        {
+            if (musicSource != null)
+                DontDestroyOnLoad(musicSource.gameObject);
+
+            if (sfxSource != null)
+                DontDestroyOnLoad(sfxSource.gameObject);
         }
 
         private void Initialize()

@@ -25,6 +25,38 @@ namespace App.Services
             _musicSource.Play();
         }
 
+        public void PlayMusicOnce(AudioClip clip)
+        {
+            if (clip == null)
+                return;
+
+            if (_musicSource != null)
+            {
+                _musicSource.Stop();
+                _musicSource.loop = false;
+                _musicSource.clip = clip;
+                _musicSource.mute = false;
+                _musicSource.Play();
+
+                Debug.Log(
+                    $"AudioService: PlayMusicOnce '{clip.name}' " +
+                    $"(length {clip.length:F1}s).");
+                return;
+            }
+
+            if (_sfxSource != null)
+            {
+                _sfxSource.PlayOneShot(clip);
+                Debug.Log(
+                    $"AudioService: PlayMusicOnce via SFX '{clip.name}'.");
+            }
+            else
+            {
+                Debug.LogWarning(
+                    "AudioService: PlayMusicOnce failed — no audio sources.");
+            }
+        }
+
         public void PlaySFX(AudioClip clip)
         {
             if (_sfxSource == null || clip == null)

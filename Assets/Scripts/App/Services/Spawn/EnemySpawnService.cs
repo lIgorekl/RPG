@@ -46,8 +46,6 @@ namespace App.Services.Spawn
                 EnemySpawnCombatRole.Ranged,
                 isBoss: false);
 
-            var bossDefinition = FindBossDefinition(allowedDefinitions);
-
             var regularDefinitions = FilterRegularDefinitions(
                 allowedDefinitions);
 
@@ -70,9 +68,6 @@ namespace App.Services.Spawn
                 rangedDefinition,
                 regularDefinitions,
                 context.RandomSource);
-
-            if (ShouldSpawnBoss(context, bossDefinition))
-                spawnPlan.Add(bossDefinition);
 
             if (spawnPlan.Count == 0)
                 return Array.Empty<BaseEnemyView>();
@@ -122,17 +117,6 @@ namespace App.Services.Spawn
             }
 
             return plan;
-        }
-
-        private static bool ShouldSpawnBoss(
-            EnemySpawnContext context,
-            EnemySpawnDefinition bossDefinition)
-        {
-            if (bossDefinition == null)
-                return false;
-
-            return context.RandomSource.NextDouble() <=
-                context.Settings.BossSpawnChance;
         }
 
         private List<BaseEnemyView> SpawnFromPlan(
@@ -217,18 +201,6 @@ namespace App.Services.Spawn
             }
 
             return definition.CombatRole;
-        }
-
-        private static EnemySpawnDefinition FindBossDefinition(
-            List<EnemySpawnDefinition> definitions)
-        {
-            foreach (var definition in definitions)
-            {
-                if (definition != null && definition.IsBoss)
-                    return definition;
-            }
-
-            return null;
         }
 
         private static bool ContainsDefinition(

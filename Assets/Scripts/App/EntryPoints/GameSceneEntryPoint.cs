@@ -3,6 +3,7 @@ using App.Services;
 using App.Services.Spawn;
 using App.SaveLoad;
 using App.Repositories;
+using App.Events;
 using Presentation.Player;
 using Presentation.Scene;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using Presentation.AI;
 
 namespace App
 {
-    public class GameSceneEntryPoint : MonoBehaviour
+    public class GameSceneEntryPoint : MonoBehaviour, IGameEnemyRegistry
     {
         [SerializeField] private PlayerController player;
         [SerializeField] private BaseEnemyView[] enemies;
@@ -21,9 +22,13 @@ namespace App
         [SerializeField] private EnemySpawnCatalog spawnCatalog;
         [SerializeField] private EnemySpawnSettings spawnSettings;
 
+        [Header("Game Events")]
+        [SerializeField] private GameEventsSettings gameEventsSettings;
+
         private readonly List<BaseEnemyView> _registeredEnemies = new();
         private SaveLoadInteractor _saveLoadInteractor;
         private ISaveService _saveService;
+        private GameEventsInstaller _gameEventsInstaller;
 
         private void Awake()
         {
@@ -53,29 +58,86 @@ namespace App
             RegisterSceneEnemies();
             SpawnAndRegisterEnemies(gameModeService);
 
-            var playerTransform = player != null ? player.transform : null;
-
             foreach (var enemy in _registeredEnemies)
-            {
-                if (enemy == null)
-                    continue;
+                SetupEnemy(enemy, audioService, gameModeService);
 
-                enemy.InitializeAudio(audioService);
-
-                var behaviour =
-                    enemy.GetComponent<BaseEnemyBehaviour>();
-
-                if (behaviour == null)
-                    continue;
-
-                if (playerTransform != null)
-                    behaviour.SetPlayer(playerTransform);
-
-                behaviour.Initialize(gameModeService);
-            }
+            InitializeGameEvents(audioService);
 
             Debug.Log("Enemies count: " + _registeredEnemies.Count);
             Debug.Log("SaveService CREATED");
+        }
+
+        private void InitializeGameEvents(IAudioService audioService)
+        {
+            if (audioService == null)
+            {
+                Debug.LogError(
+                    "GameSceneEntryPoint: AudioService is null. " +
+                    "Start the game from MainMenu so GameEntryPoint initializes audio.");
+                return;
+            }
+
+            if (gameEventsSettings == null)
+            {
+                Debug.LogWarning(
+                    "GameSceneEntryPoint: GameEventsSettings is not assigned.");
+                return;
+            }
+
+            if (gameEventsSettings.VictoryMusic == null)
+            {
+                Debug.LogWarning(
+                    "GameSceneEntryPoint: VictoryMusic is not assigned in GameEventsSettings.");
+            }
+
+            _gameEventsInstaller = new GameEventsInstaller(
+                new GameEventBus(),
+                gameEventsSettings,
+                audioService,
+                this,
+                spawnPoints,
+                player);
+
+            foreach (var enemy in _registeredEnemies)
+                _gameEventsInstaller.RegisterEnemy(enemy);
+        }
+
+        public void RegisterSpawnedEnemy(BaseEnemyView enemy)
+        {
+            if (enemy == null)
+                return;
+
+            RegisterEnemy(enemy);
+
+            var audioService =
+                GameEntryPoint.Instance.GetAudioService();
+
+            var gameModeService =
+                GameEntryPoint.Instance.GetGameModeService();
+
+            SetupEnemy(enemy, audioService, gameModeService);
+
+            _gameEventsInstaller?.RegisterEnemy(enemy);
+        }
+
+        private void SetupEnemy(
+            BaseEnemyView enemy,
+            IAudioService audioService,
+            IGameModeService gameModeService)
+        {
+            if (enemy == null)
+                return;
+
+            enemy.InitializeAudio(audioService);
+
+            var behaviour = enemy.GetComponent<BaseEnemyBehaviour>();
+            if (behaviour == null)
+                return;
+
+            if (player != null)
+                behaviour.SetPlayer(player.transform);
+
+            behaviour.Initialize(gameModeService);
         }
 
         private void RegisterSceneEnemies()
