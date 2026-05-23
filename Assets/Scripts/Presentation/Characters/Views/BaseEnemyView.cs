@@ -164,6 +164,11 @@ namespace Presentation.Scene
             return enemyId;
         }
 
+        public void SetEnemyId(string id)
+        {
+            enemyId = id;
+        }
+
         public void ApplySaveData(EnemySaveData data)
         {
             StopAllCoroutines();

@@ -18,7 +18,6 @@ namespace Presentation.UI
         private PauseMenuController _controller;
         private ISaveService _saveService;
         private PlayerController _player;
-        private BaseEnemyView[] _enemies;
         private GameSceneEntryPoint _entryPoint;
 
         private void Update()
@@ -53,7 +52,6 @@ namespace Presentation.UI
 
             _saveService = _entryPoint.GetSaveService();
             _player = _entryPoint.GetPlayer();
-            _enemies = _entryPoint.GetEnemies();
 
             if (_saveService == null)
                 Debug.LogError("SaveService is NULL");
@@ -99,7 +97,7 @@ namespace Presentation.UI
 
             data.Enemies = new List<EnemySaveData>();
 
-            foreach (var enemy in _enemies)
+            foreach (var enemy in _entryPoint.GetEnemies())
             {
                 if (enemy == null)
                     continue;

@@ -37,6 +37,11 @@ namespace Presentation.AI
         // Радиус обнаружения задаётся в конкретных типах врагов
         public abstract float DetectionRadius { get; }
 
+        public void SetPlayer(Transform player)
+        {
+            _player = player;
+        }
+
         public void Initialize(
             IGameModeService gameModeService)
         {

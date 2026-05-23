@@ -1,5 +1,6 @@
 using UnityEngine;
 using App.Services;
+using App.Services.Spawn;
 using App.SaveLoad;
 using App.Repositories;
 using Presentation.Player;
@@ -14,6 +15,13 @@ namespace App
         [SerializeField] private PlayerController player;
         [SerializeField] private BaseEnemyView[] enemies;
 
+        [Header("Enemy Spawning")]
+        [SerializeField] private bool enableEnemySpawning = true;
+        [SerializeField] private SpawnPoint[] spawnPoints;
+        [SerializeField] private EnemySpawnCatalog spawnCatalog;
+        [SerializeField] private EnemySpawnSettings spawnSettings;
+
+        private readonly List<BaseEnemyView> _registeredEnemies = new();
         private SaveLoadInteractor _saveLoadInteractor;
         private ISaveService _saveService;
 
@@ -26,13 +34,12 @@ namespace App
         {
             Debug.Log("GameSceneEntryPoint Initialize CALLED");
 
-            var audioService = 
+            var audioService =
                 GameEntryPoint.Instance.GetAudioService();
 
             var gameModeService =
                 GameEntryPoint.Instance.GetGameModeService();
 
-            // SAVE
             IPlayerRepository repository = new JsonPlayerRepository();
             _saveLoadInteractor = new SaveLoadInteractor(repository);
             _saveService = new SaveService(_saveLoadInteractor);
@@ -42,7 +49,13 @@ namespace App
                 player.InitializeAudio(audioService);
             }
 
-            foreach (var enemy in enemies)
+            _registeredEnemies.Clear();
+            RegisterSceneEnemies();
+            SpawnAndRegisterEnemies(gameModeService);
+
+            var playerTransform = player != null ? player.transform : null;
+
+            foreach (var enemy in _registeredEnemies)
             {
                 if (enemy == null)
                     continue;
@@ -52,15 +65,64 @@ namespace App
                 var behaviour =
                     enemy.GetComponent<BaseEnemyBehaviour>();
 
-                if (behaviour != null)
-                {
-                    behaviour.Initialize(
-                        gameModeService);
-                }
+                if (behaviour == null)
+                    continue;
+
+                if (playerTransform != null)
+                    behaviour.SetPlayer(playerTransform);
+
+                behaviour.Initialize(gameModeService);
             }
 
-            Debug.Log("Enemies count: " + enemies.Length);
+            Debug.Log("Enemies count: " + _registeredEnemies.Count);
             Debug.Log("SaveService CREATED");
+        }
+
+        private void RegisterSceneEnemies()
+        {
+            if (enemies == null)
+                return;
+
+            foreach (var enemy in enemies)
+                RegisterEnemy(enemy);
+        }
+
+        private void SpawnAndRegisterEnemies(IGameModeService gameModeService)
+        {
+            if (!enableEnemySpawning ||
+                spawnCatalog == null ||
+                spawnSettings == null ||
+                spawnPoints == null ||
+                spawnPoints.Length == 0)
+            {
+                return;
+            }
+
+            var spawnService = new EnemySpawnService(
+                new EnemyFactory(),
+                new RandomSpawnPointSelector(),
+                new WeightedEnemySpawnDefinitionSelector());
+
+            var context = new EnemySpawnContext(
+                gameModeService.CurrentMode,
+                spawnCatalog,
+                spawnSettings,
+                spawnPoints,
+                player != null ? player.transform : null,
+                new System.Random());
+
+            var spawnedEnemies = spawnService.Spawn(context);
+
+            foreach (var enemy in spawnedEnemies)
+                RegisterEnemy(enemy);
+        }
+
+        private void RegisterEnemy(BaseEnemyView enemy)
+        {
+            if (enemy == null || _registeredEnemies.Contains(enemy))
+                return;
+
+            _registeredEnemies.Add(enemy);
         }
 
         public ISaveService GetSaveService()
@@ -75,13 +137,12 @@ namespace App
 
         public BaseEnemyView[] GetEnemies()
         {
-            return enemies;
+            return _registeredEnemies.ToArray();
         }
 
         public void ApplyEnemiesSaveData(List<EnemySaveData> enemiesData)
         {
-            // 1. выключаем всех
-            foreach (var enemy in enemies)
+            foreach (var enemy in _registeredEnemies)
             {
                 if (enemy == null)
                     continue;
@@ -89,10 +150,9 @@ namespace App
                 enemy.gameObject.SetActive(false);
             }
 
-            // 2. восстанавливаем
             foreach (var enemyData in enemiesData)
             {
-                foreach (var enemy in enemies)
+                foreach (var enemy in _registeredEnemies)
                 {
                     if (enemy == null)
                         continue;
