@@ -3,19 +3,25 @@ using UnityEngine.InputSystem;
 
 namespace Presentation.Player
 {
-    // Отвечает за движение игрока: обработку ввода, перемещение и поворот персонажа.
-    // Не является MonoBehaviour — управляется из PlayerController.
+    // Отвечает за движение и поворот игрока
+    // Обрабатывает перемещение относительно камеры
     public class PlayerMovement
     {
+        // Компонент перемещения персонажа
         private CharacterController _controller;
+
+        // Камера, относительно которой рассчитывается движение
         private Camera _camera;
+
+        // Компонент анимации персонажа
         private Animator _animator;
 
+        // Параметры скорости движения
         private float _walkSpeed;
         private float _runSpeed;
         private float _rotationSpeed;
 
-        // Текущее состояние движения (ходьба или бег)
+        // Текущее состояние движения
         private enum MovementState
         {
             Walk,
@@ -41,18 +47,20 @@ namespace Presentation.Player
             _rotationSpeed = rotationSpeed;
         }
 
+        // Обновляет движение игрока
         public void Update(PlayerInputData input)
         {
+            // Проверяем наличие необходимых компонентов
             if (_camera == null || _controller == null)
                 return;
 
             Vector2 moveInput = input.Move;
 
-            // Нормализация диагонального движения
+            // Нормализуем движение по диагонали
             if (moveInput.sqrMagnitude > 1f)
                 moveInput.Normalize();
 
-            // Если игрок не движется — останавливаем анимацию
+            // Если игрок стоит на месте, останавливаем анимацию
             if (moveInput.sqrMagnitude < 0.01f)
             {
                 if (_animator != null)
@@ -61,35 +69,39 @@ namespace Presentation.Player
                 return;
             }
 
-            // Движение относительно камеры
+            // Получаем направления вперед и вправо относительно камеры
             Vector3 forward = _camera.transform.forward;
             Vector3 right = _camera.transform.right;
 
+            // Убираем влияние наклона камеры
             forward.y = 0f;
             right.y = 0f;
 
             forward.Normalize();
             right.Normalize();
 
+            // Рассчитываем итоговое направление движения
             Vector3 moveDir =
                 forward * moveInput.y +
                 right * moveInput.x;
 
-            // Переключение состояния
+            // Определяем режим движения
             _state =
                 input.Sprint
                     ? MovementState.Run
                     : MovementState.Walk;
 
+            // Выбираем скорость в зависимости от режима
             float speed =
                 _state == MovementState.Run
                     ? _runSpeed
                     : _walkSpeed;
 
+            // Перемещаем персонажа
             _controller.Move(
                 moveDir * speed * Time.deltaTime);
 
-            // Поворот персонажа
+            // Поворачиваем персонажа в сторону движения
             Quaternion targetRotation =
                 Quaternion.LookRotation(moveDir);
 
@@ -99,7 +111,7 @@ namespace Presentation.Player
                     targetRotation,
                     _rotationSpeed * Time.deltaTime);
 
-            // Анимация
+            // Обновляем анимацию движения
             if (_animator != null)
             {
                 float speedPercent =

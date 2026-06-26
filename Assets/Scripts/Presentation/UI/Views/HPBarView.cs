@@ -5,16 +5,22 @@ using Presentation.Player;
 
 namespace Presentation.UI
 {
-    // UI полоска здоровья игрока.
-    // Подписывается на событие изменения HP PlayerEntity.
+    // Отображает здоровье игрока в интерфейсе
+    // Обновляет полоску и текст при изменении HP
     public class HPBarView : MonoBehaviour
     {
+        // Ссылка на контроллер игрока
         [SerializeField] private PlayerController playerController;
+
+        // Заполнение полоски здоровья
         [SerializeField] private Image hpFill;
+
+        // Текстовое отображение текущего HP
         [SerializeField] private TMP_Text hpText;
 
         private void Start()
         {
+            // Проверяем корректность настройки компонента
             if (playerController == null || hpFill == null)
             {
                 Debug.LogError("HPBarView is not configured properly");
@@ -23,9 +29,10 @@ namespace Presentation.UI
 
             var player = playerController.GetEntity();
 
+            // Подписываемся на изменение здоровья игрока
             player.HealthChanged += OnHealthChanged;
 
-            // Инициализация UI текущим состоянием HP
+            // Инициализируем интерфейс текущим состоянием здоровья
             OnHealthChanged(player.CurrentHP, player.MaxHP);
         }
 
@@ -36,16 +43,20 @@ namespace Presentation.UI
 
             var player = playerController.GetEntity();
 
+            // Отписываемся от события при уничтожении объекта
             if (player != null)
                 player.HealthChanged -= OnHealthChanged;
         }
 
+        // Обновляет отображение здоровья в интерфейсе
         private void OnHealthChanged(int current, int max)
         {
+            // Вычисляем процент оставшегося здоровья
             float normalized = (float)current / max;
 
             hpFill.fillAmount = normalized;
 
+            // Обновляем текстовое отображение HP
             if (hpText != null)
                 hpText.text = $"HP: {current} / {max}";
         }

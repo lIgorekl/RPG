@@ -1,8 +1,9 @@
 namespace Core.Combat
 {
-    // Контракт для объектов, которые могут получать урон.
+    // Интерфейс для объектов, способных получать урон
     public interface IDamageable
     {
+        // Получает входящий урон
         void ReceiveDamage(Damage damage);
     }
 }

@@ -6,23 +6,37 @@ using Gameplay.AI;
 
 namespace Presentation.AI
 {
-    // Базовое поведение всех врагов.
-    // Содержит общую логику AI: state machine, NavMeshAgent и ссылку на игрока.
+    // Базовый класс для всех типов врагов
+    // Хранит общие компоненты и управляет работой AI через машину состояний
     public abstract class BaseEnemyBehaviour : MonoBehaviour, IEnemyBehaviour
     {
-        // Основные компоненты AI
+        // Машина состояний врага
         protected EnemyStateMachineBase _stateMachine;
+
+        // Представление врага
         protected BaseEnemyView _enemyView;
+
+        // Компонент навигации Unity
         protected NavMeshAgent _agent;
+
+        // Политика агрессии врага
         protected IAggroPolicy _aggroPolicy;
+
+        // Сервис случайного перемещения
         protected EnemyWanderService _wanderService;
+
+        // Сервис движения врага
         protected EnemyMovementService _movementService;
+
+        // Сервис проверки боевых условий
         protected EnemyCombatEvaluator _combatEvaluator;
+
         private IGameModeService _gameModeService;
 
+        // Ссылка на игрока
         [SerializeField] protected Transform _player;
 
-        // Публичный доступ для состояний
+        // Публичный доступ к основным объектам для состояний AI
         public Transform Player => _player;
         public Transform Self => transform;
         public BaseEnemyView EnemyView => _enemyView;
@@ -34,66 +48,81 @@ namespace Presentation.AI
         public EnemyMovementService MovementService => _movementService;
         public EnemyCombatEvaluator CombatEvaluator => _combatEvaluator;
 
-        // Радиус обнаружения задаётся в конкретных типах врагов
+        // Радиус обнаружения задается конкретным типом врага
         public abstract float DetectionRadius { get; }
 
+        // Устанавливает ссылку на игрока
         public void SetPlayer(Transform player)
         {
             _player = player;
         }
 
+        // Инициализирует зависимости AI
         public void Initialize(
             IGameModeService gameModeService)
         {
             _gameModeService = gameModeService;
 
+            // Создаем сервис случайного патрулирования
             _wanderService = new EnemyWanderService();
 
+            // Создаем сервис перемещения
             _movementService = new EnemyMovementService();
 
+            // Создаем сервис проверки боевых условий
             _combatEvaluator = new EnemyCombatEvaluator();
 
+            // Получаем представление врага
             _enemyView = GetComponent<BaseEnemyView>();
 
+            // Получаем NavMeshAgent для навигации
             _agent = GetComponent<NavMeshAgent>();
         }
 
         protected virtual void Start()
         {
-            // Проверяем, что ссылка на игрока установлена
+            // Проверяем наличие ссылки на игрока
             if (_player == null)
             {
                 Debug.LogError($"{name}: Player reference not set!");
             }
 
+            // Проверяем находится ли агент на NavMesh
             if (_agent != null && !_agent.isOnNavMesh)
             {
+                // Если нет, пытаемся найти ближайшую точку NavMesh
                 if (UnityEngine.AI.NavMesh.SamplePosition(
                     transform.position,
                     out UnityEngine.AI.NavMeshHit hit,
                     2f,
                     UnityEngine.AI.NavMesh.AllAreas))
                 {
+                    // Перемещаем агента на найденную точку
                     _agent.Warp(hit.position);
                 }
             }
 
+            // Выбираем логику агрессии в зависимости от режима игры
             if (_gameModeService != null &&
                 _gameModeService.CurrentMode == GameMode.Peaceful)
             {
+                // Мирный режим — враги не атакуют игрока
                 _aggroPolicy = new PeacefulAggroPolicy();
             }
             else
             {
+                // Обычный режим — враги реагируют на игрока
                 _aggroPolicy = new NormalAggroPolicy();
             }
         }
 
         protected virtual void Update()
         {
+            // Мертвые враги больше не обновляют AI
             if (_enemyView.IsDead)
                 return;
 
+            // Передаем обновление текущему состоянию
             _stateMachine.Update();
         }
     }

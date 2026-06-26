@@ -3,11 +3,17 @@ using Core.Combat;
 
 namespace Gameplay.Characters
 {
-    // Доменная сущность игрока.
-    // Здесь будет размещаться логика, специфичная для игрока.
+    // Доменная сущность игрока
+    // Хранит игровые характеристики и состояние игрока
+    // Наследуется от BaseCharacter, поэтому получает здоровье,
+    // систему получения урона и базовые параметры атаки
     public class PlayerEntity : BaseCharacter
     {
-        public PlayerEntity(CharacterStats stats) : base(stats)
+        // Создает игровую сущность игрока
+        // В конструктор передаются характеристики персонажа
+        // (здоровье, физический и магический урон)
+        public PlayerEntity(CharacterStats stats)
+            : base(stats)
         {
         }
     }

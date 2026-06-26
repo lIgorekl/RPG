@@ -4,15 +4,33 @@ using UnityEngine;
 
 namespace App.Events
 {
+    // Обработчик события достижения необходимого количества убийств.
+    // После выполнения условия создает босса и публикует событие
+    // о его появлении.
     public sealed class BossSpawnOnKillHandler
     {
+        // Шина игровых событий
         private readonly IGameEventBus _eventBus;
+
+        // Настройки игровых событий
         private readonly GameEventsSettings _settings;
+
+        // Сервис создания босса
         private readonly IBossSpawnService _bossSpawnService;
+
+        // Реестр врагов игры
         private readonly IGameEnemyRegistry _enemyRegistry;
+
+        // Доступные точки появления босса
         private readonly SpawnPoint[] _spawnPoints;
+
+        // Ссылка на игрока
         private readonly Transform _player;
+
+        // Генератор случайных чисел
         private readonly System.Random _random;
+
+        // Флаг, предотвращающий повторное появление босса
         private bool _bossSpawned;
 
         public BossSpawnOnKillHandler(
@@ -32,20 +50,35 @@ namespace App.Events
             _player = player;
             _random = random;
 
+            // Подписываемся на событие изменения
+            // количества убитых обычных врагов
             _eventBus.Subscribe<RegularEnemyKillCountChangedEvent>(
                 OnKillCountChanged);
         }
 
+        // Вызывается при изменении количества убийств
         private void OnKillCountChanged(
             RegularEnemyKillCountChangedEvent countEvent)
         {
+            // Если босс уже появился,
+            // ничего не делаем
             if (_bossSpawned)
                 return;
 
-            if (countEvent.KillCount < _settings.BossSpawnKillCount)
+            // Если убийств еще недостаточно,
+            // ожидаем дальнейших событий
+            if (countEvent.KillCount <
+                _settings.BossSpawnKillCount)
+            {
                 return;
+            }
 
-            var bossDefinition = _settings.BossSpawnDefinition;
+            // Получаем описание босса
+            var bossDefinition =
+                _settings.BossSpawnDefinition;
+
+            // Если описание отсутствует,
+            // выводим предупреждение
             if (bossDefinition == null)
             {
                 Debug.LogWarning(
@@ -53,19 +86,33 @@ namespace App.Events
                 return;
             }
 
+            // Запоминаем,
+            // что босс уже был создан
             _bossSpawned = true;
 
-            var bossView = _bossSpawnService.SpawnBoss(
-                bossDefinition,
-                _spawnPoints,
-                _player,
-                _random);
+            // Создаем босса
+            var bossView =
+                _bossSpawnService.SpawnBoss(
+                    bossDefinition,
+                    _spawnPoints,
+                    _player,
+                    _random);
 
+            // Если создать босса не удалось,
+            // завершаем работу
             if (bossView == null)
                 return;
 
-            _enemyRegistry.RegisterSpawnedEnemy(bossView);
-            _eventBus.Publish(new BossSpawnedEvent(bossView));
+            // Регистрируем нового врага
+            // в системе игры
+            _enemyRegistry.RegisterSpawnedEnemy(
+                bossView);
+
+            // Сообщаем всем системам,
+            // что босс появился
+            _eventBus.Publish(
+                new BossSpawnedEvent(
+                    bossView));
         }
     }
 }

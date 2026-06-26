@@ -4,11 +4,11 @@ using Presentation.Combat;
 
 namespace Presentation.Player
 {
-    // Система боевых действий игрока.
-    // Отвечает за ближнюю атаку (меч) и магическую атаку (снаряд).
+    // Система боевых действий игрока
+    // Выполняет ближние и магические атаки
     public class PlayerCombat
     {
-        // Зависимости
+        // Зависимости для создания и выполнения атак
         private Camera _camera;
         private Transform _spawnPoint;
         private ProjectileView _projectilePrefab;
@@ -26,39 +26,49 @@ namespace Presentation.Player
             _swordHitbox = swordHitbox;
         }
 
-        // Запускает ближнюю атаку (активирует хитбокс меча)
+        // Выполняет ближнюю атаку через хитбокс меча
         public void MeleeAttack(Damage damage)
         {
+            // Передаем урон в хитбокс меча
             _swordHitbox.Initialize(damage);
+
+            // Включаем регистрацию попаданий
             _swordHitbox.Activate();
         }
 
-        // Выключает хитбокс после окончания атаки
+        // Завершает ближнюю атаку
         public void StopMelee()
         {
             _swordHitbox.Deactivate();
         }
 
-        // Создаёт магический снаряд и задаёт ему направление
+        // Создает магический снаряд
         public void CastMagic(Damage damage, Transform owner)
         {
+            // Проверяем наличие необходимых объектов
             if (_projectilePrefab == null ||
                 _spawnPoint == null ||
                 _camera == null)
                 return;
 
+            // Получаем направление взгляда камеры
             Vector3 direction = _camera.transform.forward;
 
+            // Убираем вертикальную составляющую
             direction.y = 0;
+
             direction.Normalize();
 
+            // Рассчитываем поворот снаряда
             Quaternion rotation = Quaternion.LookRotation(direction);
 
+            // Создаем объект снаряда на сцене
             var projectile = Object.Instantiate(
                 _projectilePrefab,
                 _spawnPoint.position,
                 rotation);
 
+            // Передаем снаряду данные об уроне и владельце
             projectile.Initialize(damage, owner);
         }
     }

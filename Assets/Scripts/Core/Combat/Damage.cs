@@ -1,17 +1,20 @@
 namespace Core.Combat
 {
-    // Тип урона. Используется для разделения механик (физический / магический).
+    // Тип урона в боевой системе
     public enum DamageType
     {
         Physical,
         Magical
     }
 
-    // Структура, описывающая урон.
-    // Передаётся между системами боя (оружие, снаряды, персонажи).
+    // Структура с данными об уроне
+    // Передается между объектами во время атаки
     public struct Damage
     {
+        // Величина урона
         public int Value;
+
+        // Тип урона
         public DamageType Type;
 
         public Damage(int value, DamageType type)

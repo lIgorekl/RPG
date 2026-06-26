@@ -1,16 +1,19 @@
 namespace Core.Gameplay
 {
-    // Простая система кулдауна.
-    // Используется для атак, способностей и других таймеров.
+    // Универсальная система кулдауна
+    // Используется для ограничения частоты атак и способностей
     public class Cooldown
     {
+        // Длительность кулдауна в секундах
         private float _duration;
+
+        // Оставшееся время до окончания кулдауна
         private float _timer;
 
-        // Активен ли кулдаун
+        // Проверяет активен ли кулдаун в данный момент
         public bool IsActive => _timer > 0f;
 
-        // Прогресс кулдауна (для UI)
+        // Возвращает прогресс кулдауна для UI
         public float Progress =>
             IsActive ? _timer / _duration : 0f;
 
@@ -19,20 +22,22 @@ namespace Core.Gameplay
             _duration = duration;
         }
 
-        // Запуск кулдауна
+        // Запускает кулдаун
         public void Start()
         {
             _timer = _duration;
         }
 
-        // Обновление таймера
+        // Обновляет таймер кулдауна
         public void Update(float deltaTime)
         {
             if (_timer <= 0f)
                 return;
 
+            // Уменьшаем оставшееся время
             _timer -= deltaTime;
 
+            // Не допускаем отрицательных значений
             if (_timer < 0f)
                 _timer = 0f;
         }
